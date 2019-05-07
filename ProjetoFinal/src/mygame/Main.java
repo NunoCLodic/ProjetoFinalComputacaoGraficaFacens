@@ -16,6 +16,7 @@ public class Main extends SimpleApplication {
 
     public static void main(String[] args) {
         Main app = new Main();
+        app.setShowSettings(false);
         app.start();
     }
 
@@ -33,11 +34,11 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleUpdate(float tpf) {
-        //TODO: add update code
+        
     }
 
     @Override
     public void simpleRender(RenderManager rm) {
-        //TODO: add render code
+        
     }
 }
