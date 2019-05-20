@@ -42,18 +42,42 @@ public class JogoTapete extends SimpleApplication {
 //Criação da Tapete rolante
 
     public void CriarTapete() {
+        //tapete
         Box floor = new Box(1f, 1f, 1f);
-        floor.updateGeometry(new Vector3f(-5f, -1.5f, -5f), new Vector3f(4f, -1.5f, 4f));
+        floor.updateGeometry(new Vector3f(-5f, -1.5f, -5f), new Vector3f(4f, -1.45f, 4f));
         Geometry tapete = new Geometry("Floor", floor);
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         Texture tap = assetManager.loadTexture("Textures/Tapete.jpg");
         mat.setTexture("ColorMap", tap);
         tapete.setMaterial(mat);
-
-        tapete.scale(2f, 2f, 0.5f);
+        tapete.scale(2f, 2.2f, 0.5f);
         tapete.move(0f, 0f, 0f);
-
         rootNode.attachChild(tapete);
+
+        //Resto do Chao
+        Box floor1 = new Box(1f, 1f, 1f);
+        floor1.updateGeometry(new Vector3f(-5f, -1.5f, -5f), new Vector3f(4f, -1.5f, 1.5f));
+        Geometry tapete1 = new Geometry("Floor", floor1);
+        Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        Texture tap1 = assetManager.loadTexture("Textures/Barreira.jpg");
+        mat1.setTexture("ColorMap", tap1);
+        tapete1.setMaterial(mat1);
+        tapete1.scale(2.2f, 2f, 1f);
+        tapete1.move(0f, -0.2f, 1.5f);
+        rootNode.attachChild(tapete1);
+
+        //Area de decisão
+        Box floorArea = new Box(1f, 1f, 1f);
+        floorArea.updateGeometry(new Vector3f(-5f, -1.5f, -5f), new Vector3f(4f, -1.45f, 4f));
+        Geometry tapeteArea = new Geometry("Floor", floorArea);
+        Material matArea = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        Texture tapArea = assetManager.loadTexture("Textures/Area.jpg");
+        matArea.setTexture("ColorMap", tapArea);
+        tapeteArea.setMaterial(matArea);
+        tapeteArea.scale(0.4f, 2.2f, 0.5f);
+        tapeteArea.move(0f, 0.01f, 0f);
+        rootNode.attachChild(tapeteArea);
+
     }
 //Criação da porta de entrada dos objetos
 
@@ -66,7 +90,6 @@ public class JogoTapete extends SimpleApplication {
         Texture tex = assetManager.loadTexture("Textures/Porta.png");
         mat.setTexture("ColorMap", tex);
         geom.setMaterial(mat);
-
         rootNode.attachChild(geom);
     }
 //Criação da porta de saida dos objetos
@@ -114,14 +137,13 @@ public class JogoTapete extends SimpleApplication {
 
     }
 //Criação dos Objetos
-        //exemplo com esfera
-    public void CriarEsfera(){
+    //exemplo com esfera
+
+    public void CriarEsfera() {
         Sphere s = new Sphere(20, 20, 1);
         Geometry esfera = new Geometry("S1", s);
-
         esfera.rotate(0, FastMath.PI, 0);
         esfera.move(-9f, -2.42f, 0f);
-
         Material esferaM = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         esferaM.setColor("Color", ColorRGBA.Red);
         esfera.setMaterial(esferaM);
@@ -133,7 +155,6 @@ public class JogoTapete extends SimpleApplication {
     public void CriarObjetos() {
 
         //Random Objetos = new Random(System.currentTimeMillis());
-        
     }
 
     public void drawNinja() {
