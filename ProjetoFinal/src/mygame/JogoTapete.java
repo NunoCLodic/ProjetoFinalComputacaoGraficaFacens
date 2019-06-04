@@ -74,11 +74,10 @@ public class JogoTapete extends SimpleApplication {
 
         //Area de decisão
         Box floorArea = new Box(1f, 1f, 1f);
-        floorArea.updateGeometry(new Vector3f(-5f, -1.5f, -5f), new Vector3f(4f, -1.45f, 4f));
+        floorArea.updateGeometry(new Vector3f(-5f, -1.5f, -5f), new Vector3f(4f, -0.5f, 4f));
         Geometry tapeteArea = new Geometry("Floor", floorArea);
-        Material matArea = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        Texture tapArea = assetManager.loadTexture("Textures/Area.jpg");
-        matArea.setTexture("ColorMap", tapArea);
+        Material matArea = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");   
+        matArea.setColor("Color", ColorRGBA.Blue);
         tapeteArea.setMaterial(matArea);
         tapeteArea.scale(0.4f, 2.2f, 0.5f);
         tapeteArea.move(0f, 0.01f, 0f);
@@ -142,8 +141,6 @@ public class JogoTapete extends SimpleApplication {
         rootNode.attachChild(geom3);
 
     }
-//Criação dos Objetos
-    //exemplo com esfera
 
     public void CriarEsfera() {
         Sphere s = new Sphere(20, 20, 1);
