@@ -36,7 +36,7 @@ public class JogoTapete extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        cam.setLocation(new Vector3f(0, 0, 20));
+        cam.setLocation(new Vector3f(-1, -1, 20));
         flyCam.setEnabled(false);
         CriarTapete();
         CriarPortaEntrada();
