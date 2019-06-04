@@ -32,14 +32,13 @@ public class JogoTapete extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        cam.setLocation(new Vector3f(0,0,20));
+        cam.setLocation(new Vector3f(0, 0, 20));
         flyCam.setEnabled(false);
         CriarTapete();
         CriarPortaEntrada();
         CriarPortaSaida();
         CriarEsfera();
         CriarObjetos();
-        
 
     }
 //Criação da Tapete rolante
@@ -185,4 +184,8 @@ public class JogoTapete extends SimpleApplication {
 
     }
 
+    public void comparaColisao() { //Método que compara se o jogador acertou a bola com a cor do chão
+      
+
+    }
 }

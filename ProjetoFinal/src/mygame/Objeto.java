@@ -15,11 +15,11 @@ import com.jme3.scene.shape.Sphere;
  *
  * @author delga
  */
+//Classe que cria e controla as ações dos objetos do cenário
 public class Objeto {
 
     Geometry esfera;
     boolean acertou;
-    
 
     Objeto() {
         Sphere s = new Sphere(20, 20, 1);
@@ -27,15 +27,16 @@ public class Objeto {
         esfera.rotate(0, FastMath.PI, 0);
         esfera.move(-9f, -2.42f, 0f);
         //esfera.Color("Color", ColorRGBA.Red); necessário setar a cor        
-        
 
     }
-    
-    public void ControlePonto (JogoTapete X){
-    if (X.score == true)
-        acertou = true;
-    else
-        acertou = true;
+
+    //Método para controle de Pontuação, variavel será usada no método da classe Pontuação
+    public void ControlePonto(JogoTapete X) {
+        if (X.score == true) {
+            acertou = true;
+        } else {
+            acertou = false;
+        }
     }
 
 }
