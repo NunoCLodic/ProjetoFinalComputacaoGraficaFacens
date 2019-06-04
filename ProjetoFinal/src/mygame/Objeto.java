@@ -18,6 +18,7 @@ import com.jme3.scene.shape.Sphere;
 public class Objeto {
 
     Geometry esfera;
+    boolean acertou;
     
 
     Objeto() {
@@ -25,7 +26,16 @@ public class Objeto {
         esfera = new Geometry("S1", s);
         esfera.rotate(0, FastMath.PI, 0);
         esfera.move(-9f, -2.42f, 0f);
-        //esfera.Color("Color", ColorRGBA.Red); necessário setar a cor
+        //esfera.Color("Color", ColorRGBA.Red); necessário setar a cor        
+        
+
+    }
+    
+    public void ControlePonto (JogoTapete X){
+    if (X.score == true)
+        acertou = true;
+    else
+        acertou = true;
     }
 
 }

@@ -20,22 +20,21 @@ import com.jme3.texture.Texture;
 import java.util.Random;
 
 public class Pontuacao {
-    int cont;
+    int cont, vida;
     
-    //Contrutor que reseta os pontos sempre que o jogo inicia
     Pontuacao (){
     cont = 0;
+    vida = 3;
     
     }
     
-    public int somaPontos (JogoTapete x){
+    public int ControlePontos (Objeto x){
     if (x.acertou == true)
         return cont++;
     
-    return cont;
-   
-    }
+    return vida--;
     
+    }
 
 
 }

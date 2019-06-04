@@ -21,8 +21,8 @@ import java.util.Random;
 
 public class JogoTapete extends SimpleApplication {
 
-    Node nodeNinja = new Node("Ninja");
     private boolean isRunning = true;
+    private boolean score;
 
     public static void main(String[] args) {
         JogoTapete app = new JogoTapete();
@@ -39,6 +39,7 @@ public class JogoTapete extends SimpleApplication {
         CriarPortaSaida();
         CriarEsfera();
         CriarObjetos();
+        
 
     }
 //Criação da Tapete rolante
@@ -159,9 +160,6 @@ public class JogoTapete extends SimpleApplication {
         //Random Objetos = new Random(System.currentTimeMillis());
     }
 
-    public void drawNinja() {
-
-    }
     boolean dir = true;
 
     @Override
