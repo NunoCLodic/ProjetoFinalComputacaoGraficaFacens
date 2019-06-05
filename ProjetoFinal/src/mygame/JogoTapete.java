@@ -149,7 +149,8 @@ public class JogoTapete extends SimpleApplication {
         Material esferaM = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         esferaM.setColor("Color", ColorRGBA.Red);
         esfera.setMaterial(esferaM);
-        esfera.scale(0.4f, 0.4f, 0.4f);
+        esfera.scale(0.4f, 0.4f, 0.4f
+                //esfera.getWorldTranslation().x
 
         rootNode.attachChild(esfera);
     }
