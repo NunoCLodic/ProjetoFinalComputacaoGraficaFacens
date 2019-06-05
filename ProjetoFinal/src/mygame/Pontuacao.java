@@ -30,6 +30,7 @@ public class Pontuacao {
         nivel = 1;
 
     }
+    
 
     //Método que recebe informação se houve colisão correta ou não e incremente ponto ou retira vida
     public void ControlePontos(Objeto x) {

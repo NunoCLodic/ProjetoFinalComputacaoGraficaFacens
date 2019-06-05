@@ -38,5 +38,6 @@ public class Objeto {
             acertou = false;
         }
     }
+    
 
 }
