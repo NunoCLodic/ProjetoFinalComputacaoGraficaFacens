@@ -1,6 +1,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -12,13 +13,12 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
-import java.util.Random;
+import com.jme3.ui.Picture;
 
 public class JogoTapete extends SimpleApplication {
 
@@ -38,15 +38,40 @@ public class JogoTapete extends SimpleApplication {
     public void simpleInitApp() {
         cam.setLocation(new Vector3f(-1, -1, 20));
         flyCam.setEnabled(false);
+
+        CriaImagens();
         CriarTapete();
+        CriarAreaDecisao();
         CriarPortaEntrada();
         CriarPortaSaida();
         CriarEsfera();
-        CriarObjetos();
-
     }
-//Criação da Tapete rolante
 
+    public void CriaImagens() {
+
+        Picture vida = new Picture("HUD Picture");
+        vida.setImage(assetManager, "Imagens/Coracao.png", true);
+        vida.setWidth(settings.getWidth() / 25);
+        vida.setHeight(settings.getHeight() / 25);
+        vida.setPosition(settings.getWidth() / 2, (settings.getHeight() /2) + 230);
+        guiNode.attachChild(vida);
+        vida.move(4, 9, 0);
+        Picture pontuacao = new Picture("HUD Picture");
+        pontuacao.setImage(assetManager, "Imagens/Pontuacao.png", true);
+        pontuacao.setWidth(settings.getWidth() / 25);
+        pontuacao.setHeight(settings.getHeight() / 25);
+        pontuacao.setPosition((settings.getWidth() / 2) + 90, (settings.getHeight() / 2) + 230);
+        guiNode.attachChild(pontuacao);
+        pontuacao.move(8, 9, 0);
+        BitmapText Nivel = new BitmapText(guiFont, false);
+        Nivel.setSize(guiFont.getCharSet().getRenderedSize());      
+        Nivel.setColor(ColorRGBA.Orange);                            
+        Nivel.setText("Nivel:");             
+        Nivel.setLocalTranslation(640, (Nivel.getLineWidth()/1) + 520, 2);
+        guiNode.attachChild(Nivel);
+    }
+
+//Criação da Tapete rolante
     public void CriarTapete() {
         //tapete
         Box floor = new Box(1f, 1f, 1f);
@@ -59,7 +84,6 @@ public class JogoTapete extends SimpleApplication {
         tapete.scale(2f, 2.2f, 0.5f);
         tapete.move(0f, 0f, 0f);
         rootNode.attachChild(tapete);
-
         //Resto do Chao
         Box floor1 = new Box(1f, 1f, 1f);
         floor1.updateGeometry(new Vector3f(-5f, -1.5f, -5f), new Vector3f(4f, -1.5f, 1.5f));
@@ -72,11 +96,14 @@ public class JogoTapete extends SimpleApplication {
         tapete1.move(0f, -0.2f, 1.5f);
         rootNode.attachChild(tapete1);
 
-        //Area de decisão
+    }
+//Criação da Area de decisão
+
+    public void CriarAreaDecisao() {
         Box floorArea = new Box(1f, 1f, 1f);
-        floorArea.updateGeometry(new Vector3f(-5f, -1.5f, -5f), new Vector3f(4f, -0.5f, 4f));
+        floorArea.updateGeometry(new Vector3f(-5f, -1.5f, -5f), new Vector3f(0.2f, -0.5f, 4f));
         Geometry tapeteArea = new Geometry("Floor", floorArea);
-        Material matArea = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");   
+        Material matArea = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         matArea.setColor("Color", ColorRGBA.Blue);
         tapeteArea.setMaterial(matArea);
         tapeteArea.scale(0.4f, 2.2f, 0.5f);
@@ -109,7 +136,6 @@ public class JogoTapete extends SimpleApplication {
         mat.setTexture("ColorMap", tex);
         geom.setMaterial(mat);
         rootNode.attachChild(geom);
-
         Box esq = new Box(1f, 1f, 1f);
         esq.updateGeometry(new Vector3f(0f, 0f, 0f), new Vector3f(1f, 3f, 1f));
         Geometry geom1 = new Geometry("Box", esq);
@@ -119,7 +145,6 @@ public class JogoTapete extends SimpleApplication {
         mat1.setTexture("ColorMap", tex1);
         geom1.setMaterial(mat1);
         rootNode.attachChild(geom1);
-
         Box dir = new Box(1f, 1f, 1f);
         dir.updateGeometry(new Vector3f(0f, 0f, 0f), new Vector3f(1f, 3f, 1f));
         Geometry geom2 = new Geometry("Box", dir);
@@ -129,7 +154,6 @@ public class JogoTapete extends SimpleApplication {
         mat2.setTexture("ColorMap", tex2);
         geom2.setMaterial(mat2);
         rootNode.attachChild(geom2);
-
         Box cima = new Box(1f, 1f, 1f);
         cima.updateGeometry(new Vector3f(0f, 0f, 0f), new Vector3f(1f, 0.6f, 6.5f));
         Geometry geom3 = new Geometry("Box", cima);
@@ -139,7 +163,6 @@ public class JogoTapete extends SimpleApplication {
         mat3.setTexture("ColorMap", tex3);
         geom3.setMaterial(mat3);
         rootNode.attachChild(geom3);
-
     }
 
     public void CriarEsfera() {
@@ -151,13 +174,7 @@ public class JogoTapete extends SimpleApplication {
         esferaM.setColor("Color", ColorRGBA.Red);
         esfera.setMaterial(esferaM);
         esfera.scale(0.4f, 0.4f, 0.4f);
-
         rootNode.attachChild(esfera);
-    }
-
-    public void CriarObjetos() {
-
-        //Random Objetos = new Random(System.currentTimeMillis());
     }
 
     boolean dir = true;
