@@ -1,42 +1,33 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package mygame;
 
-import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Sphere;
 import com.jme3.texture.Texture;
 
-public class JogoTapete extends SimpleApplication {
+/**
+ *
+ * @author delga
+ */
+//Classe que cria o cenário do Jogo
+public class Cenario {
+  
 
-    private boolean isRunning = true;
-    private boolean score;
-    Pontuacao pontuacao = new Pontuacao();
-
-    public static void main(String[] args) {
-        JogoTapete app = new JogoTapete();
-        app.setShowSettings(false);
-        app.start();
-    }
-
-    @Override
-    public void simpleInitApp() {
-        cam.setLocation(new Vector3f(0, 0, 20));
-        flyCam.setEnabled(false);
-        criarTapete();
-        criarPortaEntrada();
-        criarPortaSaida();
-        Cenario cenario = new Cenario();
-        //cenario.criarTapete(assetManager.getClass()));
-        //cenario.criarPortaEntrada(assetManager.getClass());
-        //cenario.criarPortaSaida(assetManager.getClass());
-
-    }
-    boolean dir = true;
-
-    public void criarTapete() {
+//Criação da Tapete rolante
+/*
+    public void criarTapete(AssetManager assetManager) {
         //tapete
         Box floor = new Box(1f, 1f, 1f);
         floor.updateGeometry(new Vector3f(-5f, -1.5f, -5f), new Vector3f(4f, -1.45f, 4f));
@@ -73,10 +64,11 @@ public class JogoTapete extends SimpleApplication {
         tapeteArea.move(0f, 0.01f, 0f);
         rootNode.attachChild(tapeteArea);
 
+        
     }
 //Criação da porta de entrada dos objetos
 
-    public void criarPortaEntrada() {
+    public void criarPortaEntrada(AssetManager assetManager) {
         Box portaEntrada = new Box(1f, 1f, 1f);
         portaEntrada.updateGeometry(new Vector3f(0f, 0f, 0f), new Vector3f(1f, 3f, 4.5f));
         Geometry geom = new Geometry("Box", portaEntrada);
@@ -89,7 +81,7 @@ public class JogoTapete extends SimpleApplication {
     }
 //Criação da porta de saida dos objetos
 
-    public void criarPortaSaida() {
+    public void criarPortaSaida(AssetManager assetManager) {
         Box portaSaida = new Box(1f, 1f, 1f);
         portaSaida.updateGeometry(new Vector3f(0f, 0f, 0f), new Vector3f(1f, 3f, 4.5f));
         Geometry geom = new Geometry("Box", portaSaida);
@@ -130,34 +122,7 @@ public class JogoTapete extends SimpleApplication {
         geom3.setMaterial(mat3);
         rootNode.attachChild(geom3);
 
-    }
+    }*/
 
-    @Override
-    public void simpleUpdate(float tpf) {
-
-        while (pontuacao.vida > 0) {
-
-            System.currentTimeMillis(); //Teste para um inimigo ser criado em X em X tempo
-            Inimigo inimigo = new Inimigo(pontuacao.nivel);
-
-            Spatial s = rootNode.getChild("S1");
-            s.move(tpf, 0, 0);
-            System.out.println(s.getLocalTranslation().x);
-
-            if (dir == true) {
-                s.move(tpf, 0, 0);
-                if (s.getLocalTranslation().x > 8) {
-                    dir = false;
-                }
-            } else {
-//            s.removeFromParent();
-                s.move(-tpf, 0, 0);
-            }
-
-        }//while
-
-        //Mostrar Score Final na tela
-        //Mostrar menu de Reset
-    }
 
 }
