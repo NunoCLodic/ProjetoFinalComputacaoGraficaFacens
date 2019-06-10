@@ -4,7 +4,7 @@ package mygame;
 //Classe que controle o sistema de Pontos, Vidas e Nível do Jogo
 public class Pontuacao {
 
-    int score, vida, nivel;
+    public int score, vida, nivel;
 
     Pontuacao() {
         score = 0;
