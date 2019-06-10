@@ -23,7 +23,8 @@ public class JogoTapete extends SimpleApplication {
     private boolean dir = true;
     private Material esfera;
     private Material colisao;
-    private BitmapText hudText;
+    private BitmapText score, nivel, vida;
+    private Inimigo inimigo;
    
 
     public static void main(String[] args) {
@@ -38,14 +39,18 @@ public class JogoTapete extends SimpleApplication {
 
         cam.setLocation(new Vector3f(0, 0, 20));
         flyCam.setEnabled(false);
+      
 
         criarTapete();
         criarPortaEntrada();
         criarPortaSaida();
-        esfera = CriarEsfera();
+        
+        esfera = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         colisao = criarAreaDescisao();
         pontuacao = new Pontuacao ();
-        hudText = new BitmapText(guiFont, false);
+        score = new BitmapText(guiFont, false);
+        nivel = new BitmapText(guiFont, false);
+        vida = new BitmapText(guiFont, false);
 
         inputManager.addMapping("Pause", new KeyTrigger(KeyInput.KEY_P));
         inputManager.addListener(actionListener, "Pause");
@@ -61,11 +66,30 @@ public class JogoTapete extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf) {
         
-        hudText.setSize(guiFont.getCharSet().getRenderedSize());      // font size
-        hudText.setColor(ColorRGBA.Blue);    
-        hudText.setText("Score:" + pontuacao.score);// font color
-        hudText.setLocalTranslation(300, hudText.getLineHeight(), 0); // position
-        guiNode.attachChild(hudText);
+       
+        inimigo = new Inimigo (pontuacao.nivel, assetManager);
+        rootNode.attachChild(inimigo.esfera);
+        
+        
+        score.setSize(guiFont.getCharSet().getRenderedSize());      // font size
+        score.setColor(ColorRGBA.Blue);    // font color
+        score.setText("Score:" + pontuacao.score);
+        score.setLocalTranslation(100, score.getLineHeight(), 0); // position
+        guiNode.attachChild(score);
+        
+        nivel.setSize(guiFont.getCharSet().getRenderedSize());      // font size
+        nivel.setColor(ColorRGBA.Blue);    // font color
+        nivel.setText("Nivel:" + pontuacao.nivel);
+        nivel.setLocalTranslation(300, nivel.getLineHeight(), 0); // position
+        guiNode.attachChild(nivel);
+        
+        vida.setSize(guiFont.getCharSet().getRenderedSize());      // font size
+        vida.setColor(ColorRGBA.Blue);    // font color
+        vida.setText("Vida:" + pontuacao.vida);
+        vida.setLocalTranslation(550, vida.getLineHeight(), 0); // position
+        guiNode.attachChild(vida);
+        
+        
         
         
         
@@ -108,7 +132,7 @@ public class JogoTapete extends SimpleApplication {
 
             }
             if (name.equals("Colisao") && !keyPressed) {
-                if (esfera.getName()==colisao.getName() && verificaArea() ){
+                if (inimigo.cor == 2 && verificaArea() ){
                     pontuacao.controlePontos(true);
                 } else {
                     pontuacao.controlePontos(false);
@@ -207,22 +231,6 @@ public class JogoTapete extends SimpleApplication {
         mat3.setTexture("ColorMap", tex3);
         geom3.setMaterial(mat3);
         rootNode.attachChild(geom3);
-
-    }
-
-    public Material CriarEsfera() {
-        Sphere s = new Sphere(20, 20, 1);
-        Geometry esfera = new Geometry("S1", s);
-        esfera.rotate(0, FastMath.PI, 0);
-        esfera.move(-5f, -3f, 1f);
-        Material esferaM = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        esferaM.setColor("Color", ColorRGBA.Red);
-        esfera.setMaterial(esferaM);
-        esfera.scale(0.4f, 0.4f, 0.4f);
-
-        rootNode.attachChild(esfera);
-
-        return esferaM;
 
     }
 
