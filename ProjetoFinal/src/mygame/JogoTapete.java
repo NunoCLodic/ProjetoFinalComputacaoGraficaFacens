@@ -30,7 +30,9 @@ public class JogoTapete extends SimpleApplication {
     private BitmapText hudText2;
 
     boolean RemoveEsfera = false;
-    boolean Iniciar = true;
+    boolean Iniciar = false;
+    boolean verificaArea = false;
+    boolean Alertas = true;
 
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
@@ -51,16 +53,12 @@ public class JogoTapete extends SimpleApplication {
         criarTapete();
         criarPortaEntrada();
         criarPortaSaida();
-
-        esfera = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-
-        pontuacao = new Pontuacao();
-
-        criarTapete();
-        criarPortaEntrada();
-        criarPortaSaida();
         CriaImagens();
         CriaAlerta();
+
+        esfera = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        pontuacao = new Pontuacao();
+
         pontuacao = new Pontuacao();
 
         hudText = new BitmapText(guiFont, false);
@@ -68,60 +66,70 @@ public class JogoTapete extends SimpleApplication {
         hudText2 = new BitmapText(guiFont, false);
 
         inputManager.addMapping("Iniciar", new KeyTrigger(KeyInput.KEY_I));
-        inputManager.addListener(actionListener, "Pause");
+        inputManager.addListener(actionListener, "Iniciar");
         inputManager.addMapping("Colisao", new KeyTrigger(KeyInput.KEY_SPACE));
         inputManager.addListener(actionListener, "Colisao");
+        inputManager.addMapping("GameOver", new KeyTrigger(KeyInput.KEY_G));
+        inputManager.addListener(actionListener, "GameOver");
+        inputManager.addMapping("Reiniciar", new KeyTrigger(KeyInput.KEY_R));
+        inputManager.addListener(actionListener, "Reiniciar");
+        inputManager.addMapping("Pausa", new KeyTrigger(KeyInput.KEY_P));
+        inputManager.addListener(actionListener, "Pausa");
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-    if (Iniciar == true){
-        inimigo = new Inimigo(pontuacao.nivel, assetManager);
-        rootNode.attachChild(inimigo.esfera);
+        if (Iniciar == true) {
+            inimigo = new Inimigo(pontuacao.nivel, assetManager);
+            rootNode.attachChild(inimigo.esfera);
 
-        area = new Area(pontuacao.nivel, assetManager);
-        rootNode.attachChild(area.tapeteArea);
+            area = new Area(pontuacao.nivel, assetManager);
+            rootNode.attachChild(area.tapeteArea);
 
-        hudText.setSize(guiFont.getCharSet().getRenderedSize());
-        hudText.setColor(ColorRGBA.Green);
-        hudText.setText("Score: " + pontuacao.score);// font color
-        hudText.setLocalTranslation(630, hudText.getLineHeight() / 2 + 550, 20);
-        guiNode.attachChild(hudText);
+            hudText.setSize(guiFont.getCharSet().getRenderedSize());
+            hudText.setColor(ColorRGBA.Green);
+            hudText.setText("Score: " + pontuacao.score);// font color
+            hudText.setLocalTranslation(630, hudText.getLineHeight() / 2 + 550, 20);
+            guiNode.attachChild(hudText);
 
-        hudText1.setSize(guiFont.getCharSet().getRenderedSize());
-        hudText1.setColor(ColorRGBA.Green);
-        hudText1.setText("" + pontuacao.nivel);// font color
-        hudText1.setLocalTranslation(570, hudText1.getLineHeight() / 2 + 550, 20);
-        guiNode.attachChild(hudText1);
+            hudText1.setSize(guiFont.getCharSet().getRenderedSize());
+            hudText1.setColor(ColorRGBA.Green);
+            hudText1.setText("" + pontuacao.nivel);// font color
+            hudText1.setLocalTranslation(570, hudText1.getLineHeight() / 2 + 550, 20);
+            guiNode.attachChild(hudText1);
 
-        hudText2.setSize(guiFont.getCharSet().getRenderedSize());
-        hudText2.setColor(ColorRGBA.Green);
-        hudText2.setText("" + pontuacao.vida);// font color
-        hudText2.setLocalTranslation(480, hudText2.getLineHeight() / 2 + 550, 20);
-        guiNode.attachChild(hudText2);
+            hudText2.setSize(guiFont.getCharSet().getRenderedSize());
+            hudText2.setColor(ColorRGBA.Green);
+            hudText2.setText("" + pontuacao.vida);// font color
+            hudText2.setLocalTranslation(480, hudText2.getLineHeight() / 2 + 550, 20);
+            guiNode.attachChild(hudText2);
 
-        Spatial s = rootNode.getChild("S1");
-        s.move(tpf, 0, 0);
-        System.out.println(s.getLocalTranslation().x);
-
-        if (dir == true) {
-
+            Spatial s = rootNode.getChild("S1");
             s.move(tpf, 0, 0);
+            System.out.println(s.getLocalTranslation().x);
 
-            if (s.getLocalTranslation().x > 7) {
-                s.removeFromParent();
-            }
-            if (RemoveEsfera == true) {
-                s.removeFromParent();
-                RemoveEsfera = false;
-            }
-            if (pontuacao.nivel < 30) {
-                s.move(tpf + pontuacao.nivel * 0.06f, 0, 0);
-            } else {
-                s.move(tpf + 20.0f, 0, 0);
+            if (dir == true) {
+
+                s.move(tpf, 0, 0);
+
+                if (s.getLocalTranslation().x > 7) {
+                    s.removeFromParent();
+                }
+
+                if ((s.getLocalTranslation().x > -1.9) && (s.getLocalTranslation().x < 1.3)) {
+                    verificaArea = true;
+                }
+                if (RemoveEsfera == true) {
+                    s.removeFromParent();
+                    RemoveEsfera = false;
+                }
+                if (pontuacao.nivel < 30) {
+                    s.move(tpf + pontuacao.nivel * 0.06f, 0, 0);
+                } else {
+                    s.move(tpf + 20.0f, 0, 0);
+                }
             }
         }
-       }
     }
 
     private final ActionListener actionListener = new ActionListener() {
@@ -129,23 +137,30 @@ public class JogoTapete extends SimpleApplication {
         public void onAction(String name, boolean keyPressed, float tpf) {
             if (name.equals("Iniciar") && !keyPressed) {
                 Iniciar = true;
+                Alertas = false;
             }
             if (name.equals("Colisao") && !keyPressed) {
-                    ///Iniciar = true;
-                if (inimigo.cor == area.cor) {
-                    pontuacao.controlePontos(true);
-                    RemoveEsfera = true;
-                } else {
-                    pontuacao.controlePontos(false);
+                if (verificaArea == true) {
+                    if (inimigo.cor == area.cor) {
+                        pontuacao.controlePontos(true);
+                        RemoveEsfera = true;
+                    } else {
+                        pontuacao.controlePontos(false);
+                    }
                 }
+            }
+            if (name.equals("GameOver") && !keyPressed) {
+                GameOver();
+                Iniciar = false;
+            }
+            if (name.equals("Pausa") && !keyPressed) {
+                Iniciar = false;
+            }
+            if (name.equals("Reiniciar") && !keyPressed) {
+                Iniciar = true;
             }
 
         }
-
-//        private boolean verificaArea() {
-//
-//            return true;
-//        }
     };
 
 //Criação da Tapete rolante
@@ -248,13 +263,21 @@ public class JogoTapete extends SimpleApplication {
         BitmapText Alerta = new BitmapText(guiFont, false);
         Alerta.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta.setColor(ColorRGBA.Orange);
-        Alerta.setText("Para Iniciar o Jogo, Clique em start...!");
-        Alerta.setLocalTranslation(300, (Alerta.getLineWidth() / 5), 2);
+        Alerta.setText("I-inicia o jogo"
+                + "|| P-pausa o jogo"
+                + "|| R-retoma o jogo"
+                + "|| G-gameover"
+                + "|| SPACE-combina cor");
+        Alerta.setLocalTranslation(200, (Alerta.getLineWidth() / 10 ), 2);
         guiNode.attachChild(Alerta);
     }
 
     public void GameOver() {
-
+        BitmapText GameOver = new BitmapText(guiFont, false);
+        GameOver.setSize(guiFont.getCharSet().getRenderedSize());
+        GameOver.setColor(ColorRGBA.Orange);
+        GameOver.setText("Game Over");
+        GameOver.setLocalTranslation(400, (GameOver.getLineWidth() / 5 + 300), 2);
+        guiNode.attachChild(GameOver);
     }
-
 }

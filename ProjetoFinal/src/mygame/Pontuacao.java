@@ -21,7 +21,6 @@ public class Pontuacao {
         } else {
             vida--;
         }
-
     }
 
     //Método que aumenta o nível do jogo quando atinge certo score
@@ -35,8 +34,7 @@ public class Pontuacao {
     //Método que aumenta uma vida a cada 5 níveis atingidos
     public void aumentaVida() {
         if (nivel % 5 == 0) //Aumenta uma vida a cada 5 niveis
-            vida++;
-        
+            vida++;   
     }
 
 }
