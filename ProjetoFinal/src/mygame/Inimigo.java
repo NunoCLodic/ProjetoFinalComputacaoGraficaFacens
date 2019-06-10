@@ -44,7 +44,6 @@ class Inimigo {
         esfera.move(-5f, -3f, 1f);
         esferaM = new Material(manager, "Common/MatDefs/Misc/Unshaded.j3md");
 
-
         randomColor(cor, esferaM);
 
         esfera.setMaterial(esferaM);
@@ -66,5 +65,6 @@ class Inimigo {
     
     
     }
+
 
 }
