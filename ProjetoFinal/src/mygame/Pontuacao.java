@@ -10,7 +10,6 @@ public class Pontuacao {
         score = 0;
         vida = 3;
         nivel = 1;
-
     }
     
 
