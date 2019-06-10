@@ -8,7 +8,7 @@ public class Pontuacao {
 
     Pontuacao() {
         score = 0;
-        vida = 3;
+        vida = 5;
         nivel = 1;
     }
     

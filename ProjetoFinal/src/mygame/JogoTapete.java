@@ -128,6 +128,9 @@ public class JogoTapete extends SimpleApplication {
                 } else {
                     s.move(tpf + 20.0f, 0, 0);
                 }
+                if (pontuacao.vida == 0) {
+                    GameOver();
+                }
             }
         }
     }
@@ -151,7 +154,6 @@ public class JogoTapete extends SimpleApplication {
             }
             if (name.equals("GameOver") && !keyPressed) {
                 GameOver();
-                Iniciar = false;
             }
             if (name.equals("Pausa") && !keyPressed) {
                 Iniciar = false;
@@ -268,7 +270,7 @@ public class JogoTapete extends SimpleApplication {
                 + "|| R-retoma o jogo"
                 + "|| G-gameover"
                 + "|| SPACE-combina cor");
-        Alerta.setLocalTranslation(200, (Alerta.getLineWidth() / 10 ), 2);
+        Alerta.setLocalTranslation(200, (Alerta.getLineWidth() / 10), 2);
         guiNode.attachChild(Alerta);
     }
 
@@ -279,5 +281,6 @@ public class JogoTapete extends SimpleApplication {
         GameOver.setText("Game Over");
         GameOver.setLocalTranslation(400, (GameOver.getLineWidth() / 5 + 300), 2);
         guiNode.attachChild(GameOver);
+        Iniciar = false;
     }
 }

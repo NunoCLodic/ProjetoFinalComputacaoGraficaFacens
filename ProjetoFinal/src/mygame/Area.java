@@ -25,7 +25,7 @@ public class Area {
         cor = ThreadLocalRandom.current().nextInt(1, 4); //sorteia um numero de 1 a 3
         tapeteArea = new Geometry("Floor", floorArea);
         tapeteArea.rotate(0, FastMath.PI, 0);
-        tapeteArea.move(0f, -3.3f, -0.25f);
+        tapeteArea.move(-0.6f, -3.3f, -0.25f);
         matArea = new Material(manager, "Common/MatDefs/Misc/Unshaded.j3md");
 //Provisorio
         matArea.setColor("Color", ColorRGBA.Blue);
