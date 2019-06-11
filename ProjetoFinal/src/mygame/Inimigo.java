@@ -23,7 +23,8 @@ class Inimigo {
         s = new Sphere(20, 20, 1);
         esfera = new Geometry("S1", s);
         esfera.rotate(0, FastMath.PI, 0);
-        esfera.move(-10f, -2.9f, 0f);
+        esfera.move(-10f, -2.8f, 0f);
+        esfera.rotate(1, 0, 0);
         esferaM = new Material(manager, "Common/MatDefs/Misc/Unshaded.j3md");
 
         randomColor(cor, esferaM);
