@@ -25,7 +25,6 @@ public class JogoTapete extends SimpleApplication {
 
     private Inimigo inimigo;
     private Area area;
-    ;
 
     private BitmapText hudText;
     private BitmapText hudText1;
@@ -36,6 +35,8 @@ public class JogoTapete extends SimpleApplication {
     boolean verificaArea = false;
     boolean Alertas = true;
     boolean Aumentar = false;
+    boolean Reiniciar = false;
+
     int cor = 1;
     int corArea = 1;
 
@@ -47,29 +48,24 @@ public class JogoTapete extends SimpleApplication {
         app.setSettings(settings);
         app.start();
         settings.size();
-        Pontuacao pontuacao = new Pontuacao();
+        Pontuacao pontuacao = new Pontuacao();      
     }
 
     @Override
     public void simpleInitApp() {
         cam.setLocation(new Vector3f(0, -1, 20));
         flyCam.setEnabled(false);
-
         criarTapete();
         criarPortaEntrada();
         criarPortaSaida();
         CriaImagens();
         CriaAlerta();
-
         esfera = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         pontuacao = new Pontuacao();
-
         pontuacao = new Pontuacao();
-
         hudText = new BitmapText(guiFont, false);
         hudText1 = new BitmapText(guiFont, false);
         hudText2 = new BitmapText(guiFont, false);
-
         inputManager.addMapping("Iniciar", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addListener(actionListener, "Iniciar");
         inputManager.addMapping("Colisao", new KeyTrigger(KeyInput.KEY_SPACE));
@@ -86,9 +82,7 @@ public class JogoTapete extends SimpleApplication {
         inputManager.addListener(actionListener, "AumentaVelocidade");
         inputManager.addMapping("Reinicia", new KeyTrigger(KeyInput.KEY_N));
         inputManager.addListener(actionListener, "Reinicia");
-
         area = new Area(pontuacao.nivel, assetManager, corArea);
-
     }
 
     @Override
@@ -99,28 +93,25 @@ public class JogoTapete extends SimpleApplication {
             if (s == null) {
                 rootNode.attachChild(inimigo.esfera);
             }
-
             rootNode.attachChild(area.tapeteArea);
-
             hudText.setSize(guiFont.getCharSet().getRenderedSize());
             hudText.setColor(ColorRGBA.Green);
             hudText.setText("Nivel: " + pontuacao.nivel);// font color
             hudText.setLocalTranslation(630, hudText.getLineHeight() / 2 + 550, 20);
             guiNode.attachChild(hudText);
-
             hudText1.setSize(guiFont.getCharSet().getRenderedSize());
             hudText1.setColor(ColorRGBA.Green);
             hudText1.setText("" + pontuacao.score);// font color
             hudText1.setLocalTranslation(570, hudText1.getLineHeight() / 2 + 550, 20);
             guiNode.attachChild(hudText1);
-
             hudText2.setSize(guiFont.getCharSet().getRenderedSize());
             hudText2.setColor(ColorRGBA.Green);
             hudText2.setText("" + pontuacao.vida);// font color
             hudText2.setLocalTranslation(480, hudText2.getLineHeight() / 2 + 550, 20);
             guiNode.attachChild(hudText2);
-
+            
             s = rootNode.getChild("S1");
+            
             if (dir == true) {
 
                 if (s.getLocalTranslation().x > 7) {
@@ -166,7 +157,6 @@ public class JogoTapete extends SimpleApplication {
                     if (cor == corArea) {
                         corArea = ThreadLocalRandom.current().nextInt(1, 4);
                         area = new Area(pontuacao.nivel, assetManager, corArea);
-
                         pontuacao.controlePontos(true);
                         RemoveEsfera = true;
                     } else {
@@ -190,7 +180,7 @@ public class JogoTapete extends SimpleApplication {
                 Iniciar = true;
             }
             if (name.equals("Reinicia") && !keyPressed) {
-                //--------------------------------
+                Reiniciar();
             }
             if (name.equals("AumentaVelocidade") && !keyPressed) {
                 Aumentar = true;
@@ -244,6 +234,15 @@ public class JogoTapete extends SimpleApplication {
         mat.setTexture("ColorMap", tex);
         geom.setMaterial(mat);
         rootNode.attachChild(geom);
+
+        Box portaEntradaBola = new Box(1f, 1f, 1f);
+        portaEntradaBola.updateGeometry(new Vector3f(0f, 0f, 0f), new Vector3f(1f, 2.81f, 1.9f));
+        Geometry geomBola = new Geometry("Box", portaEntradaBola);
+        geomBola.move(-9.9f, -3.2f, -1.2f);
+        Material matBola = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        matBola.setColor("Color", ColorRGBA.Black);
+        geomBola.setMaterial(matBola);
+        rootNode.attachChild(geomBola);
     }
 
 //Criação da porta de saida dos objetos
@@ -266,9 +265,9 @@ public class JogoTapete extends SimpleApplication {
         mat1.setTexture("ColorMap", tex1);
         geom1.setMaterial(mat1);
         rootNode.attachChild(geom1);
-        Box dir = new Box(1f, 1f, 1f);
-        dir.updateGeometry(new Vector3f(0f, 0f, 0f), new Vector3f(1f, 3f, 1f));
-        Geometry geom2 = new Geometry("Box", dir);
+        Box direita = new Box(1f, 1f, 1f);
+        direita.updateGeometry(new Vector3f(0f, 0f, 0f), new Vector3f(1f, 3f, 1f));
+        Geometry geom2 = new Geometry("Box", direita);
         geom2.move(7f, -3.2f, 2f);
         Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         Texture tex2 = assetManager.loadTexture("Textures/Pedra.jpg");
@@ -294,12 +293,12 @@ public class JogoTapete extends SimpleApplication {
         vida.setHeight(settings.getHeight() / 25);
         vida.setPosition(settings.getWidth() / 2, (settings.getHeight() / 2) + 240);
         guiNode.attachChild(vida);
-        Picture pontuacao = new Picture("HUD Picture");
-        pontuacao.setImage(assetManager, "Imagens/Pontuacao.png", true);
-        pontuacao.setWidth(settings.getWidth() / 35);
-        pontuacao.setHeight(settings.getHeight() / 25);
-        pontuacao.setPosition((settings.getWidth() / 2) + 90, (settings.getHeight() / 2) + 240);
-        guiNode.attachChild(pontuacao);
+        Picture pontos = new Picture("HUD Picture");
+        pontos.setImage(assetManager, "Imagens/Pontuacao.png", true);
+        pontos.setWidth(settings.getWidth() / 35);
+        pontos.setHeight(settings.getHeight() / 25);
+        pontos.setPosition((settings.getWidth() / 2) + 90, (settings.getHeight() / 2) + 240);
+        guiNode.attachChild(pontos);
     }
 
 //Criação de alerta
@@ -323,7 +322,7 @@ public class JogoTapete extends SimpleApplication {
         Alerta2.setLocalTranslation(205, (Alerta2.getLineWidth() / 20 + 20), 2);
         guiNode.attachChild(Alerta2);
     }
-
+//Game Over
     public void GameOver() {
         BitmapText GameOver = new BitmapText(guiFont, true);
         GameOver.setSize(guiFont.getCharSet().getRenderedSize());
@@ -333,7 +332,11 @@ public class JogoTapete extends SimpleApplication {
         guiNode.attachChild(GameOver);
         Iniciar = false;
     }
-    public void Reiniciar(){
-        
+//Reinicia a partida
+    public void Reiniciar() {
+        Reiniciar = true;
+        pontuacao.nivel = 1;
+        pontuacao.score = 0;
+        pontuacao.vida = 5;
     }
 }

@@ -1,6 +1,5 @@
 package mygame;
 
-
 //Classe que controle o sistema de Pontos, Vidas e Nível do Jogo
 public class Pontuacao {
 
@@ -11,7 +10,6 @@ public class Pontuacao {
         vida = 5;
         nivel = 1;
     }
-    
 
     //Método que recebe informação se houve colisão correta ou não e incremente ponto ou retira vida
     public void controlePontos(boolean x) {
@@ -33,8 +31,16 @@ public class Pontuacao {
 
     //Método que aumenta uma vida a cada 5 níveis atingidos
     public void aumentaVida() {
-        if (nivel % 5 == 0) //Aumenta uma vida a cada 5 niveis
-            vida++;   
+        if (nivel % 2 == 0) //Aumenta uma vida a cada 2 niveis
+        {
+            vida++;
+        }
+    }
+
+    public void reiniciaJogo() {
+        score = 0;
+        vida = 5;
+        nivel = 1;
     }
 
 }
