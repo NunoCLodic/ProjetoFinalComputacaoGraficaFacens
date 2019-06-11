@@ -35,6 +35,7 @@ public class JogoTapete extends SimpleApplication {
     boolean Iniciar = false;
     boolean verificaArea = false;
     boolean Alertas = true;
+    boolean Aumentar = false;
     int cor = 1;
     int corArea = 1;
 
@@ -75,12 +76,17 @@ public class JogoTapete extends SimpleApplication {
         inputManager.addListener(actionListener, "Colisao");
         inputManager.addMapping("GameOver", new KeyTrigger(KeyInput.KEY_G));
         inputManager.addListener(actionListener, "GameOver");
-        inputManager.addMapping("Reiniciar", new KeyTrigger(KeyInput.KEY_R));
-        inputManager.addListener(actionListener, "Reiniciar");
+        inputManager.addMapping("Retomar", new KeyTrigger(KeyInput.KEY_R));
+        inputManager.addListener(actionListener, "Retomar");
         inputManager.addMapping("Pausa", new KeyTrigger(KeyInput.KEY_P));
         inputManager.addListener(actionListener, "Pausa");
-        inputManager.addMapping("Troca", new KeyTrigger(KeyInput.KEY_K));
+        inputManager.addMapping("Troca", new KeyTrigger(KeyInput.KEY_T));
         inputManager.addListener(actionListener, "Troca");
+        inputManager.addMapping("AumentaVelocidade", new KeyTrigger(KeyInput.KEY_A));
+        inputManager.addListener(actionListener, "AumentaVelocidade");
+        inputManager.addMapping("Reinicia", new KeyTrigger(KeyInput.KEY_N));
+        inputManager.addListener(actionListener, "Reinicia");
+
         area = new Area(pontuacao.nivel, assetManager, corArea);
 
     }
@@ -121,30 +127,31 @@ public class JogoTapete extends SimpleApplication {
                     s.removeFromParent();
                     rootNode.detachChild(s);
                     cor = ThreadLocalRandom.current().nextInt(1, 4);
+                    pontuacao.vida--;
                 }
-
                 if ((s.getLocalTranslation().x > -1.9) && (s.getLocalTranslation().x < 1.3)) {
                     verificaArea = true;
                 } else {
                     verificaArea = false;
-
                 }
                 if (RemoveEsfera == true) {
                     s.removeFromParent();
                     RemoveEsfera = false;
-             
                 }
                 if (pontuacao.nivel < 30) {
-                    s.move(tpf + pontuacao.nivel * 0.001f, 0, 0);
+                    s.move(tpf + pontuacao.nivel * 0.01f, 0, 0);
                 } else {
-                    s.move(tpf + 20.0f, 0, 0);
+                    s.move(tpf + 3.0f, 0, 0);
                 }
                 if (pontuacao.vida == 0) {
                     GameOver();
                 }
+                if (Aumentar == true) {
+                    s.move(tpf + 1.0f, 0, 0);
+                    Aumentar = false;
+                }
             }
         }
-
     }
 
     private final ActionListener actionListener = new ActionListener() {
@@ -179,8 +186,14 @@ public class JogoTapete extends SimpleApplication {
             if (name.equals("Pausa") && !keyPressed) {
                 Iniciar = false;
             }
-            if (name.equals("Reiniciar") && !keyPressed) {
+            if (name.equals("Retomar") && !keyPressed) {
                 Iniciar = true;
+            }
+            if (name.equals("Reinicia") && !keyPressed) {
+                //--------------------------------
+            }
+            if (name.equals("AumentaVelocidade") && !keyPressed) {
+                Aumentar = true;
             }
             if (name.equals("Troca") && !keyPressed) {
                 System.out.println("abertdo" + corArea);
@@ -191,7 +204,6 @@ public class JogoTapete extends SimpleApplication {
                 }
                 area.trocaCor(corArea);
             }
-
         }
     };
 
@@ -292,24 +304,36 @@ public class JogoTapete extends SimpleApplication {
 
 //Criação de alerta
     public void CriaAlerta() {
-        BitmapText Alerta = new BitmapText(guiFont, false);
-        Alerta.setSize(guiFont.getCharSet().getRenderedSize());
-        Alerta.setColor(ColorRGBA.Orange);
-        Alerta.setText("I-inicia o jogo"
-                + "|| P-Pausa o jogo"
-                + "|| K- Troca Cor Area"
-                + "|| SPACE-combina cor");
-        Alerta.setLocalTranslation(200, (Alerta.getLineWidth() / 10), 2);
-        guiNode.attachChild(Alerta);
+        BitmapText Alerta1 = new BitmapText(guiFont, true);
+        Alerta1.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta1.setColor(ColorRGBA.Yellow);
+        Alerta1.setText("I-Inicia o jogo"
+                + "| A-Aumenta passos "
+                + "| P-Pausa o jogo "
+                + "| N-Novo Jogo ");
+        Alerta1.setLocalTranslation(200, (Alerta1.getLineWidth() / 10 + 20), 2);
+        guiNode.attachChild(Alerta1);
+        BitmapText Alerta2 = new BitmapText(guiFont, true);
+        Alerta2.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta2.setColor(ColorRGBA.Yellow);
+        Alerta2.setStyle(INPUT_MAPPING_CAMERA_POS, cor);
+        Alerta2.setText("R-Retoma o jogo "
+                + "| T-Troca Cor Area "
+                + "| SPACE-Combina as cores");
+        Alerta2.setLocalTranslation(205, (Alerta2.getLineWidth() / 20 + 20), 2);
+        guiNode.attachChild(Alerta2);
     }
 
     public void GameOver() {
-        BitmapText GameOver = new BitmapText(guiFont, false);
+        BitmapText GameOver = new BitmapText(guiFont, true);
         GameOver.setSize(guiFont.getCharSet().getRenderedSize());
         GameOver.setColor(ColorRGBA.Orange);
         GameOver.setText("Game Over");
         GameOver.setLocalTranslation(400, (GameOver.getLineWidth() / 5 + 300), 2);
         guiNode.attachChild(GameOver);
         Iniciar = false;
+    }
+    public void Reiniciar(){
+        
     }
 }
