@@ -14,6 +14,7 @@ import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.ui.Picture;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class JogoTapete extends SimpleApplication {
 
@@ -24,6 +25,7 @@ public class JogoTapete extends SimpleApplication {
 
     private Inimigo inimigo;
     private Area area;
+    ;
 
     private BitmapText hudText;
     private BitmapText hudText1;
@@ -33,6 +35,8 @@ public class JogoTapete extends SimpleApplication {
     boolean Iniciar = false;
     boolean verificaArea = false;
     boolean Alertas = true;
+    int cor = 1;
+    int corArea = 1;
 
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
@@ -75,26 +79,32 @@ public class JogoTapete extends SimpleApplication {
         inputManager.addListener(actionListener, "Reiniciar");
         inputManager.addMapping("Pausa", new KeyTrigger(KeyInput.KEY_P));
         inputManager.addListener(actionListener, "Pausa");
+        inputManager.addMapping("Troca", new KeyTrigger(KeyInput.KEY_K));
+        inputManager.addListener(actionListener, "Troca");
+        area = new Area(pontuacao.nivel, assetManager, corArea);
+
     }
 
     @Override
     public void simpleUpdate(float tpf) {
         if (Iniciar == true) {
-            inimigo = new Inimigo(pontuacao.nivel, assetManager);
-            rootNode.attachChild(inimigo.esfera);
+            inimigo = new Inimigo(pontuacao.nivel, assetManager, cor);
+            Spatial s = rootNode.getChild("S1");
+            if (s == null) {
+                rootNode.attachChild(inimigo.esfera);
+            }
 
-            area = new Area(pontuacao.nivel, assetManager);
             rootNode.attachChild(area.tapeteArea);
 
             hudText.setSize(guiFont.getCharSet().getRenderedSize());
             hudText.setColor(ColorRGBA.Green);
-            hudText.setText("Score: " + pontuacao.score);// font color
+            hudText.setText("Nivel: " + pontuacao.nivel);// font color
             hudText.setLocalTranslation(630, hudText.getLineHeight() / 2 + 550, 20);
             guiNode.attachChild(hudText);
 
             hudText1.setSize(guiFont.getCharSet().getRenderedSize());
             hudText1.setColor(ColorRGBA.Green);
-            hudText1.setText("" + pontuacao.nivel);// font color
+            hudText1.setText("" + pontuacao.score);// font color
             hudText1.setLocalTranslation(570, hudText1.getLineHeight() / 2 + 550, 20);
             guiNode.attachChild(hudText1);
 
@@ -104,27 +114,28 @@ public class JogoTapete extends SimpleApplication {
             hudText2.setLocalTranslation(480, hudText2.getLineHeight() / 2 + 550, 20);
             guiNode.attachChild(hudText2);
 
-            Spatial s = rootNode.getChild("S1");
-            s.move(tpf, 0, 0);
-            System.out.println(s.getLocalTranslation().x);
-
+            s = rootNode.getChild("S1");
             if (dir == true) {
-
-                s.move(tpf, 0, 0);
 
                 if (s.getLocalTranslation().x > 7) {
                     s.removeFromParent();
+                    rootNode.detachChild(s);
+                    cor = ThreadLocalRandom.current().nextInt(1, 4);
                 }
 
                 if ((s.getLocalTranslation().x > -1.9) && (s.getLocalTranslation().x < 1.3)) {
                     verificaArea = true;
+                } else {
+                    verificaArea = false;
+
                 }
                 if (RemoveEsfera == true) {
                     s.removeFromParent();
                     RemoveEsfera = false;
+             
                 }
                 if (pontuacao.nivel < 30) {
-                    s.move(tpf + pontuacao.nivel * 0.06f, 0, 0);
+                    s.move(tpf + pontuacao.nivel * 0.001f, 0, 0);
                 } else {
                     s.move(tpf + 20.0f, 0, 0);
                 }
@@ -133,6 +144,7 @@ public class JogoTapete extends SimpleApplication {
                 }
             }
         }
+
     }
 
     private final ActionListener actionListener = new ActionListener() {
@@ -143,14 +155,23 @@ public class JogoTapete extends SimpleApplication {
                 Alertas = false;
             }
             if (name.equals("Colisao") && !keyPressed) {
-                if (verificaArea == true) {
-                    if (inimigo.cor == area.cor) {
+                if (verificaArea) {
+                    if (cor == corArea) {
+                        corArea = ThreadLocalRandom.current().nextInt(1, 4);
+                        area = new Area(pontuacao.nivel, assetManager, corArea);
+
                         pontuacao.controlePontos(true);
                         RemoveEsfera = true;
                     } else {
                         pontuacao.controlePontos(false);
                     }
+                } else {
+                    pontuacao.controlePontos(false);
+
                 }
+                RemoveEsfera = true;
+
+                cor = ThreadLocalRandom.current().nextInt(1, 4);
             }
             if (name.equals("GameOver") && !keyPressed) {
                 GameOver();
@@ -160,6 +181,15 @@ public class JogoTapete extends SimpleApplication {
             }
             if (name.equals("Reiniciar") && !keyPressed) {
                 Iniciar = true;
+            }
+            if (name.equals("Troca") && !keyPressed) {
+                System.out.println("abertdo" + corArea);
+                corArea += 1;
+                area.cor = corArea;
+                if (corArea == 4) {
+                    corArea = 1;
+                }
+                area.trocaCor(corArea);
             }
 
         }
@@ -266,9 +296,8 @@ public class JogoTapete extends SimpleApplication {
         Alerta.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta.setColor(ColorRGBA.Orange);
         Alerta.setText("I-inicia o jogo"
-                + "|| P-pausa o jogo"
-                + "|| R-retoma o jogo"
-                + "|| G-gameover"
+                + "|| P-Pausa o jogo"
+                + "|| K- Troca Cor Area"
                 + "|| SPACE-combina cor");
         Alerta.setLocalTranslation(200, (Alerta.getLineWidth() / 10), 2);
         guiNode.attachChild(Alerta);
