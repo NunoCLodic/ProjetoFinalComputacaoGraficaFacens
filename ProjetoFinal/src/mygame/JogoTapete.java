@@ -30,6 +30,7 @@ public class JogoTapete extends SimpleApplication {
     private BitmapText hudText1;
     private BitmapText hudText2;
     private BitmapText hudText3;
+    private BitmapText hudText4;
 
     boolean RemoveEsfera = false;
     boolean Iniciar = false;
@@ -70,6 +71,7 @@ public class JogoTapete extends SimpleApplication {
         hudText1 = new BitmapText(guiFont, false);
         hudText2 = new BitmapText(guiFont, false);
         hudText3 = new BitmapText(guiFont, false);
+        hudText4 = new BitmapText(guiFont, false);
         inputManager.addMapping("Iniciar", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addListener(actionListener, "Iniciar");
         inputManager.addMapping("Colisao", new KeyTrigger(KeyInput.KEY_SPACE));
@@ -185,9 +187,19 @@ public class JogoTapete extends SimpleApplication {
                 cor = ThreadLocalRandom.current().nextInt(1, 4);
             }
             if (name.equals("Pausa") && !keyPressed) {
+                hudText4.setSize(guiFont.getCharSet().getRenderedSize());
+                hudText4.setColor(ColorRGBA.Pink);
+                hudText4.setText("Jogo Pausado..!");
+                hudText4.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
+                guiNode.attachChild(hudText4);
                 Iniciar = false;
             }
             if (name.equals("Retomar") && !keyPressed) {
+                hudText4.setSize(guiFont.getCharSet().getRenderedSize());
+                hudText4.setColor(ColorRGBA.Red);
+                hudText4.setText("");
+                hudText4.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
+                guiNode.attachChild(hudText4);
                 Iniciar = true;
             }
             if (name.equals("Reinicia") && !keyPressed) {
