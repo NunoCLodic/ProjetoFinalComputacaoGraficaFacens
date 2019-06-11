@@ -11,7 +11,7 @@ import com.jme3.scene.shape.Sphere;
  *
  * @author delga
  */
-class Inimigo {
+final class Inimigo {
 
     Sphere s;
     Geometry esfera;
@@ -21,15 +21,14 @@ class Inimigo {
     public Inimigo(int nivel, AssetManager manager, int cor) {
         s = new Sphere(20, 20, 1);
         esfera = new Geometry("S1", s);
-        esfera.rotate(0, FastMath.PI, 0);
-        esfera.move(-10f, -2.8f, -0.2f);
-        esfera.rotate(1, 0, 0);
         esferaM = new Material(manager, "Common/MatDefs/Misc/Unshaded.j3md");
-
-        randomColor(cor, esferaM);
-
+        
+        esfera.move(-10f, -2.8f, -0.2f);
+        esfera.rotate(0, 0, FastMath.PI);
         esfera.setMaterial(esferaM);
         esfera.scale(0.4f, 0.4f, 0.4f);
+
+        randomColor(cor, esferaM);
     }
 
     public void randomColor(int x, Material esferaM) {

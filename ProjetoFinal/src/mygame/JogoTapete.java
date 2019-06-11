@@ -29,6 +29,7 @@ public class JogoTapete extends SimpleApplication {
     private BitmapText hudText;
     private BitmapText hudText1;
     private BitmapText hudText2;
+    private BitmapText hudText3;
 
     boolean RemoveEsfera = false;
     boolean Iniciar = false;
@@ -48,30 +49,31 @@ public class JogoTapete extends SimpleApplication {
         app.setSettings(settings);
         app.start();
         settings.size();
-        Pontuacao pontuacao = new Pontuacao();      
+        Pontuacao pontuacao = new Pontuacao();
     }
 
     @Override
     public void simpleInitApp() {
         cam.setLocation(new Vector3f(0, -1, 20));
         flyCam.setEnabled(false);
+
         criarTapete();
         criarPortaEntrada();
         criarPortaSaida();
         CriaImagens();
         CriaAlerta();
+
         esfera = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         pontuacao = new Pontuacao();
         pontuacao = new Pontuacao();
         hudText = new BitmapText(guiFont, false);
         hudText1 = new BitmapText(guiFont, false);
         hudText2 = new BitmapText(guiFont, false);
+        hudText3 = new BitmapText(guiFont, false);
         inputManager.addMapping("Iniciar", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addListener(actionListener, "Iniciar");
         inputManager.addMapping("Colisao", new KeyTrigger(KeyInput.KEY_SPACE));
         inputManager.addListener(actionListener, "Colisao");
-        inputManager.addMapping("GameOver", new KeyTrigger(KeyInput.KEY_G));
-        inputManager.addListener(actionListener, "GameOver");
         inputManager.addMapping("Retomar", new KeyTrigger(KeyInput.KEY_R));
         inputManager.addListener(actionListener, "Retomar");
         inputManager.addMapping("Pausa", new KeyTrigger(KeyInput.KEY_P));
@@ -94,24 +96,36 @@ public class JogoTapete extends SimpleApplication {
                 rootNode.attachChild(inimigo.esfera);
             }
             rootNode.attachChild(area.tapeteArea);
+
             hudText.setSize(guiFont.getCharSet().getRenderedSize());
             hudText.setColor(ColorRGBA.Green);
-            hudText.setText("Nivel: " + pontuacao.nivel);// font color
+            if (pontuacao.vida == 0) {
+                hudText.setColor(ColorRGBA.Red);
+            }
+            hudText.setText("Nivel: " + pontuacao.nivel);
             hudText.setLocalTranslation(630, hudText.getLineHeight() / 2 + 550, 20);
             guiNode.attachChild(hudText);
+
             hudText1.setSize(guiFont.getCharSet().getRenderedSize());
             hudText1.setColor(ColorRGBA.Green);
-            hudText1.setText("" + pontuacao.score);// font color
+            if (pontuacao.vida == 0) {
+                hudText1.setColor(ColorRGBA.Red);
+            }
+            hudText1.setText("" + pontuacao.score);
             hudText1.setLocalTranslation(570, hudText1.getLineHeight() / 2 + 550, 20);
             guiNode.attachChild(hudText1);
+
             hudText2.setSize(guiFont.getCharSet().getRenderedSize());
             hudText2.setColor(ColorRGBA.Green);
-            hudText2.setText("" + pontuacao.vida);// font color
+            if (pontuacao.vida == 0) {
+                hudText2.setColor(ColorRGBA.Red);
+            }
+            hudText2.setText("" + pontuacao.vida);
             hudText2.setLocalTranslation(480, hudText2.getLineHeight() / 2 + 550, 20);
             guiNode.attachChild(hudText2);
-            
+
             s = rootNode.getChild("S1");
-            
+
             if (dir == true) {
 
                 if (s.getLocalTranslation().x > 7) {
@@ -135,7 +149,9 @@ public class JogoTapete extends SimpleApplication {
                     s.move(tpf + 3.0f, 0, 0);
                 }
                 if (pontuacao.vida == 0) {
-                    GameOver();
+                    if (Iniciar == true) {
+                        GameOver();
+                    }
                 }
                 if (Aumentar == true) {
                     s.move(tpf + 1.0f, 0, 0);
@@ -164,14 +180,9 @@ public class JogoTapete extends SimpleApplication {
                     }
                 } else {
                     pontuacao.controlePontos(false);
-
                 }
                 RemoveEsfera = true;
-
                 cor = ThreadLocalRandom.current().nextInt(1, 4);
-            }
-            if (name.equals("GameOver") && !keyPressed) {
-                GameOver();
             }
             if (name.equals("Pausa") && !keyPressed) {
                 Iniciar = false;
@@ -323,20 +334,24 @@ public class JogoTapete extends SimpleApplication {
         guiNode.attachChild(Alerta2);
     }
 //Game Over
+
     public void GameOver() {
-        BitmapText GameOver = new BitmapText(guiFont, true);
-        GameOver.setSize(guiFont.getCharSet().getRenderedSize());
-        GameOver.setColor(ColorRGBA.Orange);
-        GameOver.setText("Game Over");
-        GameOver.setLocalTranslation(400, (GameOver.getLineWidth() / 5 + 300), 2);
-        guiNode.attachChild(GameOver);
+        hudText3.setSize(guiFont.getCharSet().getRenderedSize());
+        hudText3.setColor(ColorRGBA.Red);
+        hudText3.setText("GAME OVER :( ");
+        hudText3.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
+        guiNode.attachChild(hudText3);
         Iniciar = false;
     }
 //Reinicia a partida
+
     public void Reiniciar() {
-        Reiniciar = true;
-        pontuacao.nivel = 1;
-        pontuacao.score = 0;
-        pontuacao.vida = 5;
+        pontuacao.reiniciaJogo();
+        Iniciar = true;
+        hudText3.setSize(guiFont.getCharSet().getRenderedSize());
+        hudText3.setColor(ColorRGBA.Red);
+        hudText3.setText("");
+        hudText3.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
+        guiNode.attachChild(hudText3);
     }
 }
