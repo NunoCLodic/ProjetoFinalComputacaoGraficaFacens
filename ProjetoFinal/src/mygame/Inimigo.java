@@ -19,9 +19,8 @@ class Inimigo {
     int cor;
     Material esferaM;
 
-    public Inimigo(int nivel, AssetManager manager) {
+    public Inimigo(int nivel, AssetManager manager, int cor) {
         s = new Sphere(20, 20, 1);
-        cor = ThreadLocalRandom.current().nextInt(1, 4); //sorteia um numero de 1 a 3
         esfera = new Geometry("S1", s);
         esfera.rotate(0, FastMath.PI, 0);
         esfera.move(-10f, -2.9f, 0f);

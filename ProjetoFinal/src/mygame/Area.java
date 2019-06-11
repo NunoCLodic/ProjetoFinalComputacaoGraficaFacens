@@ -19,32 +19,41 @@ public class Area {
     Geometry tapeteArea;
     int cor;
     Material matArea;
+    
+    AssetManager manager;
 
-    public Area(int nivel, AssetManager manager) {
+    public Area(int nivel, AssetManager manager, int cor) {
         Box floorArea = new Box(1f, 1f, 1f);
-        cor = ThreadLocalRandom.current().nextInt(1, 4); //sorteia um numero de 1 a 3
         tapeteArea = new Geometry("Floor", floorArea);
         tapeteArea.rotate(0, FastMath.PI, 0);
         tapeteArea.move(-0.6f, -3.3f, -0.25f);
         matArea = new Material(manager, "Common/MatDefs/Misc/Unshaded.j3md");
-//Provisorio
         matArea.setColor("Color", ColorRGBA.Blue);
-//        randomColor(cor, matArea);
+        randomColor(cor, matArea);
         tapeteArea.setMaterial(matArea);
         tapeteArea.scale(1f, 0.2f, 2.2f);
+        this.manager = manager;
+                
+    }
+    
+    public void trocaCor(int x){
+        Material  matArea = new Material(manager, "Common/MatDefs/Misc/Unshaded.j3md");
+        randomColor(x, matArea);
+        tapeteArea.setMaterial(matArea);
+             
     }
 
-//    public void randomColor (int x, Material matArea){
-//        switch (x) {
-//            case 1:
-//                matArea.setColor("Color", ColorRGBA.Blue); 
-//                break;
-//            case 2:
-//                matArea.setColor("Color", ColorRGBA.Red); 
-//                break;
-//            default:
-//                matArea.setColor("Color", ColorRGBA.Green); 
-//                break;
-//        }
-//    }
+    public void randomColor (int x, Material matArea){
+        switch (x) {
+            case 1:
+                matArea.setColor("Color", ColorRGBA.Blue); 
+                break;
+            case 2:
+                matArea.setColor("Color", ColorRGBA.Red); 
+               break;
+            default:
+                matArea.setColor("Color", ColorRGBA.Green); 
+                break;
+        }
+    }
 }

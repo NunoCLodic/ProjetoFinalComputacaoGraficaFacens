@@ -25,7 +25,7 @@ public class Pontuacao {
 
     //Método que aumenta o nível do jogo quando atinge certo score
     public void aumentaNivel() {
-        if (score % 5 == 0) { //Aumenta a dificuldade a cada 5 pontos
+        if (score % 3 == 0) { //Aumenta a dificuldade a cada 5 pontos
             nivel++;
             aumentaVida();
         }
