@@ -1,6 +1,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
 import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
@@ -16,12 +17,15 @@ import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.ui.Picture;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class JogoTapete extends SimpleApplication {
 
     private Pontuacao pontuacao;
-    private boolean dir = true;
+    private final boolean dir = true;
     private Material esfera;
     private Material colisao;
 
@@ -33,6 +37,7 @@ public class JogoTapete extends SimpleApplication {
     private BitmapText hudText2;
     private BitmapText hudText3;
     private BitmapText hudText4;
+    private BitmapText hudText5;
 
     private AudioNode audioFogo;
     private AudioNode audioPonto;
@@ -46,24 +51,32 @@ public class JogoTapete extends SimpleApplication {
     boolean Aumentar = false;
     boolean Reiniciar = false;
     boolean jogoEmpausa = false;
-    
+
     int cor = 1;
     int corArea = 1;
 
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
-        settings.setResolution(900, 600);
+        settings.setResolution(1200, 800);
         JogoTapete app = new JogoTapete();
-        app.setShowSettings(false);
         app.setSettings(settings);
+        //app.setShowSettings(false);
         app.start();
-        settings.size();
+        GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        DisplayMode[] modes = device.getDisplayModes();
+        int i = 50;
+        settings.setResolution(modes[i].getWidth(), modes[i].getHeight());
+        settings.setFrequency(modes[i].getRefreshRate());
+        settings.setBitsPerPixel(modes[i].getBitDepth());
+        settings.setFullscreen(device.isFullScreenSupported());
+        app.setSettings(settings);
+        app.restart();
         Pontuacao pontuacao = new Pontuacao();
     }
 
     @Override
     public void simpleInitApp() {
-        cam.setLocation(new Vector3f(0, -1, 20));
+        cam.setLocation(new Vector3f(-1, -1, 22));
         flyCam.setEnabled(false);
 
         criarTapete();
@@ -71,6 +84,7 @@ public class JogoTapete extends SimpleApplication {
         criarPortaSaida();
         CriaImagens();
         CriaAlerta();
+//        MeusAudios();
 
         esfera = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         pontuacao = new Pontuacao();
@@ -80,6 +94,7 @@ public class JogoTapete extends SimpleApplication {
         hudText2 = new BitmapText(guiFont, false);
         hudText3 = new BitmapText(guiFont, false);
         hudText4 = new BitmapText(guiFont, false);
+        hudText5 = new BitmapText(guiFont, false);
         inputManager.addMapping("Iniciar", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addListener(actionListener, "Iniciar");
         inputManager.addMapping("Colisao", new KeyTrigger(KeyInput.KEY_SPACE));
@@ -101,10 +116,20 @@ public class JogoTapete extends SimpleApplication {
         inputManager.addMapping("MouseA", new MouseButtonTrigger(2));
         inputManager.addListener(actionListener, "MouseA");
         area = new Area(pontuacao.nivel, assetManager, corArea);
+
+//        AppSettings settings = new AppSettings(true);
+//        System.out.println(settings);
     }
 
     @Override
     public void simpleUpdate(float tpf) {
+
+        hudText5.setSize(guiFont.getCharSet().getRenderedSize());
+        hudText5.setColor(ColorRGBA.Pink);
+        hudText5.setText("Facens -Computacao Grafica");
+        hudText5.setLocalTranslation(100, hudText.getLineHeight() / 2 + 600, 20);
+        guiNode.attachChild(hudText5);
+        
         if (Iniciar == true) {
             inimigo = new Inimigo(pontuacao.nivel, assetManager, cor);
             Spatial s = rootNode.getChild("S1");
@@ -119,7 +144,7 @@ public class JogoTapete extends SimpleApplication {
                 hudText.setColor(ColorRGBA.Red);
             }
             hudText.setText("Nivel: " + pontuacao.nivel);
-            hudText.setLocalTranslation(630, hudText.getLineHeight() / 2 + 550, 20);
+            hudText.setLocalTranslation(775, hudText.getLineHeight() / 2 + 620, 20);
             guiNode.attachChild(hudText);
 
             hudText1.setSize(guiFont.getCharSet().getRenderedSize());
@@ -128,7 +153,7 @@ public class JogoTapete extends SimpleApplication {
                 hudText1.setColor(ColorRGBA.Red);
             }
             hudText1.setText("" + pontuacao.score);
-            hudText1.setLocalTranslation(570, hudText1.getLineHeight() / 2 + 550, 20);
+            hudText1.setLocalTranslation(705, hudText1.getLineHeight() / 2 + 620, 20);
             guiNode.attachChild(hudText1);
 
             hudText2.setSize(guiFont.getCharSet().getRenderedSize());
@@ -137,7 +162,7 @@ public class JogoTapete extends SimpleApplication {
                 hudText2.setColor(ColorRGBA.Red);
             }
             hudText2.setText("" + pontuacao.vida);
-            hudText2.setLocalTranslation(480, hudText2.getLineHeight() / 2 + 550, 20);
+            hudText2.setLocalTranslation(625, hudText2.getLineHeight() / 2 + 620, 20);
             guiNode.attachChild(hudText2);
 
             s = rootNode.getChild("S1");
@@ -145,6 +170,7 @@ public class JogoTapete extends SimpleApplication {
             if (dir == true) {
 
                 if (s.getLocalTranslation().x > 7) {
+//                    audioFogo.playInstance();
                     s.removeFromParent();
                     rootNode.detachChild(s);
                     cor = ThreadLocalRandom.current().nextInt(1, 4);
@@ -189,6 +215,7 @@ public class JogoTapete extends SimpleApplication {
             if ((name.equals("Colisao") && !keyPressed) || ((name.equals("Mouse") && !keyPressed))) {
                 if (verificaArea) {
                     if (cor == corArea) {
+//                        audioPonto.playInstance();
                         corArea = ThreadLocalRandom.current().nextInt(1, 4);
                         area = new Area(pontuacao.nivel, assetManager, corArea);
                         pontuacao.controlePontos(true);
@@ -207,17 +234,15 @@ public class JogoTapete extends SimpleApplication {
                 hudText4.setSize(guiFont.getCharSet().getRenderedSize());
                 hudText4.setColor(ColorRGBA.Pink);
                 hudText4.setText("Jogo Pausado..!");
-                hudText4.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
+                hudText4.setLocalTranslation(652, hudText.getLineHeight() / 2 + 350, 20);
                 guiNode.attachChild(hudText4);
                 Iniciar = false;
                 jogoEmpausa = true;
             }
             if (name.equals("Retomar") && !keyPressed) {
                 if (Iniciar == false) {
-                    hudText4.setSize(guiFont.getCharSet().getRenderedSize());
-                    hudText4.setColor(ColorRGBA.Red);
                     hudText4.setText("");
-                    hudText4.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
+                    hudText4.setLocalTranslation(652, hudText.getLineHeight() / 2 + 350, 20);
                     guiNode.attachChild(hudText4);
                     Iniciar = true;
                 }
@@ -225,7 +250,9 @@ public class JogoTapete extends SimpleApplication {
             if (name.equals("Reinicia") && !keyPressed) {
                 Reiniciar();
             }
-            if ((name.equals("AumentaVelocidade")) || (name.equals("MouseA") && !keyPressed)) {
+
+            if ((name.equals("AumentaVelocidade") && !keyPressed) || (name.equals("MouseA"))) {
+                //audioPassos.playInstance();
                 Aumentar = true;
             }
             if ((name.equals("Troca")) || (name.equals("MouseT") && !keyPressed)) {
@@ -332,47 +359,76 @@ public class JogoTapete extends SimpleApplication {
     public void CriaImagens() {
         Picture vida = new Picture("HUD Picture");
         vida.setImage(assetManager, "Imagens/Coracao.png", true);
-        vida.setWidth(settings.getWidth() / 35);
-        vida.setHeight(settings.getHeight() / 25);
-        vida.setPosition(settings.getWidth() / 2, (settings.getHeight() / 2) + 240);
+        vida.setWidth(settings.getWidth() / 70);
+        vida.setHeight(settings.getHeight() / 50);
+        vida.setPosition(settings.getWidth() / 2 - 240, (settings.getHeight() / 2) + 100);
         guiNode.attachChild(vida);
+
         Picture pontos = new Picture("HUD Picture");
         pontos.setImage(assetManager, "Imagens/Pontuacao.png", true);
-        pontos.setWidth(settings.getWidth() / 35);
-        pontos.setHeight(settings.getHeight() / 25);
-        pontos.setPosition((settings.getWidth() / 2) + 90, (settings.getHeight() / 2) + 240);
+        pontos.setWidth(settings.getWidth() / 70);
+        pontos.setHeight(settings.getHeight() / 50);
+        pontos.setPosition((settings.getWidth() / 2 - 240) + 80, (settings.getHeight() / 2) + 100);
         guiNode.attachChild(pontos);
+
+        Picture facens = new Picture("HUD Picture");
+        facens.setImage(assetManager, "Imagens/facens.png", true);
+        facens.setWidth(settings.getWidth() / 20);
+        facens.setHeight(settings.getHeight() / 15);
+        facens.setPosition((settings.getWidth() / 2 - 750) + 80, (settings.getHeight() / 2) + 100);
+        guiNode.attachChild(facens);
+
     }
 
 //Criação de alerta
     public void CriaAlerta() {
         BitmapText Alerta1 = new BitmapText(guiFont, true);
-        Alerta1.setSize(guiFont.getCharSet().getRenderedSize());
-        Alerta1.setColor(ColorRGBA.Yellow);
-        Alerta1.setText("I-Inicia o jogo"
-                + "| A-Aumenta passos "
-                + "| P-Pausa o jogo "
-                + "| R-Retoma o jogo");
-        Alerta1.setLocalTranslation(200, (Alerta1.getLineWidth() / 10 + 20), 2);
-        guiNode.attachChild(Alerta1);
         BitmapText Alerta2 = new BitmapText(guiFont, true);
+        BitmapText Alerta3 = new BitmapText(guiFont, true);
+        BitmapText Alerta4 = new BitmapText(guiFont, true);
+        BitmapText Alerta5 = new BitmapText(guiFont, true);
+        BitmapText Alerta6 = new BitmapText(guiFont, true);
+        Alerta1.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta2.setSize(guiFont.getCharSet().getRenderedSize());
-        Alerta2.setColor(ColorRGBA.Yellow);
-        Alerta2.setStyle(INPUT_MAPPING_CAMERA_POS, cor);
-        Alerta2.setText("N-Novo Jogo "
-                + "| T-Troca Cor Area "
-                + "| SPACE-Combina as cores");
-        Alerta2.setLocalTranslation(205, (Alerta2.getLineWidth() / 20 + 20), 2);
+        Alerta3.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta4.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta5.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta6.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta1.setColor(ColorRGBA.Yellow);
+        Alerta2.setColor(ColorRGBA.Cyan);
+        Alerta3.setColor(ColorRGBA.Blue);
+        Alerta4.setColor(ColorRGBA.Green);
+        Alerta5.setColor(ColorRGBA.Magenta);
+        Alerta6.setColor(ColorRGBA.Orange);
+        Alerta1.setText("I - Inicia o jogo.");
+        Alerta2.setText("T - Troca Cor Area.");
+        Alerta3.setText("A - Aumenta passos.");
+        Alerta4.setText("P - Pausa o jogo.");
+        Alerta5.setText("R - Retoma o jogo.");
+        Alerta6.setText("SPACE - Combina as cores.");
+        Alerta1.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 120), 2);
+        Alerta2.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 100), 2);
+        Alerta3.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 80), 2);
+        Alerta4.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 60), 2);
+        Alerta5.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 40), 2);
+        Alerta6.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 20), 2);
+        guiNode.attachChild(Alerta1);
         guiNode.attachChild(Alerta2);
+        guiNode.attachChild(Alerta3);
+        guiNode.attachChild(Alerta4);
+        guiNode.attachChild(Alerta5);
+        guiNode.attachChild(Alerta6);
     }
-//Game Over
 
+//Game Over
     public void GameOver() {
         hudText3.setSize(guiFont.getCharSet().getRenderedSize());
         hudText3.setColor(ColorRGBA.Red);
-        hudText3.setText("GAME OVER :( ");
-        hudText3.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
+        hudText3.center();
+        hudText3.setText("GAME OVER");
+        hudText3.setLocalTranslation(655, hudText.getLineHeight() / 2 + 350, 20);
         guiNode.attachChild(hudText3);
+//        audioMorte.playInstance();
 
         Iniciar = false;
     }
@@ -382,13 +438,13 @@ public class JogoTapete extends SimpleApplication {
         hudText3.setSize(guiFont.getCharSet().getRenderedSize());
         hudText3.setColor(ColorRGBA.Red);
         hudText3.setText("");
-        hudText3.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
+        hudText3.setLocalTranslation(655, hudText.getLineHeight() / 2 + 350, 20);
         guiNode.attachChild(hudText3);
 
         hudText4.setSize(guiFont.getCharSet().getRenderedSize());
         hudText4.setColor(ColorRGBA.Pink);
         hudText4.setText("");
-        hudText4.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
+        hudText4.setLocalTranslation(655, hudText.getLineHeight() / 2 + 350, 20);
         guiNode.attachChild(hudText4);
 
         pontuacao.reiniciaJogo();
@@ -397,27 +453,27 @@ public class JogoTapete extends SimpleApplication {
 
     //Funcao para audios
     public void MeusAudios() {
-        audioFogo = new AudioNode(assetManager, "Sounds/Fogo.wav", false);
+        audioFogo = new AudioNode(assetManager, "Sounds/Fogo.wav", AudioData.DataType.Buffer);
         audioFogo.setLooping(false);
         audioFogo.setVolume(2);
         rootNode.attachChild(audioFogo);
 
-        audioPonto = new AudioNode(assetManager, "Sounds/Ponto.wav", false);
+        audioPonto = new AudioNode(assetManager, "Sounds/Ponto.wav", AudioData.DataType.Buffer);
         audioPonto.setLooping(false);
         audioPonto.setVolume(2);
         rootNode.attachChild(audioPonto);
 
-        audioMorte = new AudioNode(assetManager, "Sounds/Morte.wav", false);
+        audioMorte = new AudioNode(assetManager, "Sounds/Morte.wav", AudioData.DataType.Buffer);
         audioMorte.setLooping(false);
         audioMorte.setVolume(2);
         rootNode.attachChild(audioMorte);
 
-        audioPassos = new AudioNode(assetManager, "Sounds/Passo.wav", false);
+        audioPassos = new AudioNode(assetManager, "Sounds/Passo.wav", AudioData.DataType.Buffer);
         audioPassos.setLooping(false);
         audioPassos.setVolume(2);
         rootNode.attachChild(audioPassos);
 
-        audioInicio = new AudioNode(assetManager, "Sounds/Inicio.wav", false);
+        audioInicio = new AudioNode(assetManager, "Sounds/Inicio.wav", AudioData.DataType.Buffer);
         audioInicio.setLooping(true);
         audioInicio.setPositional(true);
         audioInicio.setLocalTranslation(Vector3f.ZERO.clone());
