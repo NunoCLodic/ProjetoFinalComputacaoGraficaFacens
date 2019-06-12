@@ -1,7 +1,6 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
 import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
@@ -44,10 +43,10 @@ public class JogoTapete extends SimpleApplication {
     boolean RemoveEsfera = false;
     boolean Iniciar = false;
     boolean verificaArea = false;
-    boolean Alertas = true;
     boolean Aumentar = false;
     boolean Reiniciar = false;
-
+    boolean jogoEmpausa = false;
+    
     int cor = 1;
     int corArea = 1;
 
@@ -186,9 +185,8 @@ public class JogoTapete extends SimpleApplication {
         public void onAction(String name, boolean keyPressed, float tpf) {
             if (name.equals("Iniciar") && !keyPressed) {
                 Iniciar = true;
-                Alertas = false;
             }
-            if ((name.equals("Colisao")) || (name.equals("Mouse")) && !keyPressed) {
+            if ((name.equals("Colisao") && !keyPressed) || ((name.equals("Mouse") && !keyPressed))) {
                 if (verificaArea) {
                     if (cor == corArea) {
                         corArea = ThreadLocalRandom.current().nextInt(1, 4);
@@ -204,6 +202,7 @@ public class JogoTapete extends SimpleApplication {
                 RemoveEsfera = true;
                 cor = ThreadLocalRandom.current().nextInt(1, 4);
             }
+
             if (name.equals("Pausa") && !keyPressed) {
                 hudText4.setSize(guiFont.getCharSet().getRenderedSize());
                 hudText4.setColor(ColorRGBA.Pink);
@@ -211,19 +210,22 @@ public class JogoTapete extends SimpleApplication {
                 hudText4.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
                 guiNode.attachChild(hudText4);
                 Iniciar = false;
+                jogoEmpausa = true;
             }
             if (name.equals("Retomar") && !keyPressed) {
-                hudText4.setSize(guiFont.getCharSet().getRenderedSize());
-                hudText4.setColor(ColorRGBA.Red);
-                hudText4.setText("");
-                hudText4.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
-                guiNode.attachChild(hudText4);
-                Iniciar = true;
+                if (Iniciar == false) {
+                    hudText4.setSize(guiFont.getCharSet().getRenderedSize());
+                    hudText4.setColor(ColorRGBA.Red);
+                    hudText4.setText("");
+                    hudText4.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
+                    guiNode.attachChild(hudText4);
+                    Iniciar = true;
+                }
             }
             if (name.equals("Reinicia") && !keyPressed) {
                 Reiniciar();
             }
-            if ((name.equals("AumentaVelocidade"))||(name.equals("Mouse") && !keyPressed)) {
+            if ((name.equals("AumentaVelocidade")) || (name.equals("MouseA") && !keyPressed)) {
                 Aumentar = true;
             }
             if ((name.equals("Troca")) || (name.equals("MouseT") && !keyPressed)) {
@@ -371,43 +373,51 @@ public class JogoTapete extends SimpleApplication {
         hudText3.setText("GAME OVER :( ");
         hudText3.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
         guiNode.attachChild(hudText3);
+
         Iniciar = false;
     }
 //Reinicia a partida
 
     public void Reiniciar() {
-        pontuacao.reiniciaJogo();
-        Iniciar = true;
         hudText3.setSize(guiFont.getCharSet().getRenderedSize());
         hudText3.setColor(ColorRGBA.Red);
         hudText3.setText("");
         hudText3.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
         guiNode.attachChild(hudText3);
+
+        hudText4.setSize(guiFont.getCharSet().getRenderedSize());
+        hudText4.setColor(ColorRGBA.Pink);
+        hudText4.setText("");
+        hudText4.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
+        guiNode.attachChild(hudText4);
+
+        pontuacao.reiniciaJogo();
+        Iniciar = true;
     }
 
     //Funcao para audios
     public void MeusAudios() {
-        audioFogo = new AudioNode(assetManager, "Sounds/Fogo", false);
+        audioFogo = new AudioNode(assetManager, "Sounds/Fogo.wav", false);
         audioFogo.setLooping(false);
         audioFogo.setVolume(2);
         rootNode.attachChild(audioFogo);
 
-        audioPonto = new AudioNode(assetManager, "Sounds/Ponto", false);
+        audioPonto = new AudioNode(assetManager, "Sounds/Ponto.wav", false);
         audioPonto.setLooping(false);
         audioPonto.setVolume(2);
         rootNode.attachChild(audioPonto);
 
-        audioMorte = new AudioNode(assetManager, "Sounds/Morte", false);
+        audioMorte = new AudioNode(assetManager, "Sounds/Morte.wav", false);
         audioMorte.setLooping(false);
         audioMorte.setVolume(2);
         rootNode.attachChild(audioMorte);
 
-        audioPassos = new AudioNode(assetManager, "Sounds/Passo", false);
+        audioPassos = new AudioNode(assetManager, "Sounds/Passo.wav", false);
         audioPassos.setLooping(false);
         audioPassos.setVolume(2);
         rootNode.attachChild(audioPassos);
 
-        audioInicio = new AudioNode(assetManager, "Sounds/Inicio", false);
+        audioInicio = new AudioNode(assetManager, "Sounds/Inicio.wav", false);
         audioInicio.setLooping(true);
         audioInicio.setPositional(true);
         audioInicio.setLocalTranslation(Vector3f.ZERO.clone());
