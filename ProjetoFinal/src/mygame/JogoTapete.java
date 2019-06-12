@@ -1,10 +1,13 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.audio.AudioData;
+import com.jme3.audio.AudioNode;
 import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -31,6 +34,12 @@ public class JogoTapete extends SimpleApplication {
     private BitmapText hudText2;
     private BitmapText hudText3;
     private BitmapText hudText4;
+
+    private AudioNode audioFogo;
+    private AudioNode audioPonto;
+    private AudioNode audioMorte;
+    private AudioNode audioPassos;
+    private AudioNode audioInicio;
 
     boolean RemoveEsfera = false;
     boolean Iniciar = false;
@@ -86,6 +95,12 @@ public class JogoTapete extends SimpleApplication {
         inputManager.addListener(actionListener, "AumentaVelocidade");
         inputManager.addMapping("Reinicia", new KeyTrigger(KeyInput.KEY_N));
         inputManager.addListener(actionListener, "Reinicia");
+        inputManager.addMapping("Mouse", new MouseButtonTrigger(0));
+        inputManager.addListener(actionListener, "Mouse");
+        inputManager.addMapping("MouseT", new MouseButtonTrigger(1));
+        inputManager.addListener(actionListener, "MouseT");
+        inputManager.addMapping("MouseA", new MouseButtonTrigger(2));
+        inputManager.addListener(actionListener, "MouseA");
         area = new Area(pontuacao.nivel, assetManager, corArea);
     }
 
@@ -161,6 +176,9 @@ public class JogoTapete extends SimpleApplication {
                 }
             }
         }
+
+        listener.setLocation(cam.getLocation());
+        listener.setRotation(cam.getRotation());
     }
 
     private final ActionListener actionListener = new ActionListener() {
@@ -170,7 +188,7 @@ public class JogoTapete extends SimpleApplication {
                 Iniciar = true;
                 Alertas = false;
             }
-            if (name.equals("Colisao") && !keyPressed) {
+            if ((name.equals("Colisao")) || (name.equals("Mouse")) && !keyPressed) {
                 if (verificaArea) {
                     if (cor == corArea) {
                         corArea = ThreadLocalRandom.current().nextInt(1, 4);
@@ -205,10 +223,10 @@ public class JogoTapete extends SimpleApplication {
             if (name.equals("Reinicia") && !keyPressed) {
                 Reiniciar();
             }
-            if (name.equals("AumentaVelocidade") && !keyPressed) {
+            if ((name.equals("AumentaVelocidade"))||(name.equals("Mouse") && !keyPressed)) {
                 Aumentar = true;
             }
-            if (name.equals("Troca") && !keyPressed) {
+            if ((name.equals("Troca")) || (name.equals("MouseT") && !keyPressed)) {
                 System.out.println("abertdo" + corArea);
                 corArea += 1;
                 area.cor = corArea;
@@ -332,14 +350,14 @@ public class JogoTapete extends SimpleApplication {
         Alerta1.setText("I-Inicia o jogo"
                 + "| A-Aumenta passos "
                 + "| P-Pausa o jogo "
-                + "| N-Novo Jogo ");
+                + "| R-Retoma o jogo");
         Alerta1.setLocalTranslation(200, (Alerta1.getLineWidth() / 10 + 20), 2);
         guiNode.attachChild(Alerta1);
         BitmapText Alerta2 = new BitmapText(guiFont, true);
         Alerta2.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta2.setColor(ColorRGBA.Yellow);
         Alerta2.setStyle(INPUT_MAPPING_CAMERA_POS, cor);
-        Alerta2.setText("R-Retoma o jogo "
+        Alerta2.setText("N-Novo Jogo "
                 + "| T-Troca Cor Area "
                 + "| SPACE-Combina as cores");
         Alerta2.setLocalTranslation(205, (Alerta2.getLineWidth() / 20 + 20), 2);
@@ -366,4 +384,36 @@ public class JogoTapete extends SimpleApplication {
         hudText3.setLocalTranslation(375, hudText.getLineHeight() / 2 + 350, 20);
         guiNode.attachChild(hudText3);
     }
+
+    //Funcao para audios
+    public void MeusAudios() {
+        audioFogo = new AudioNode(assetManager, "Sounds/Fogo", false);
+        audioFogo.setLooping(false);
+        audioFogo.setVolume(2);
+        rootNode.attachChild(audioFogo);
+
+        audioPonto = new AudioNode(assetManager, "Sounds/Ponto", false);
+        audioPonto.setLooping(false);
+        audioPonto.setVolume(2);
+        rootNode.attachChild(audioPonto);
+
+        audioMorte = new AudioNode(assetManager, "Sounds/Morte", false);
+        audioMorte.setLooping(false);
+        audioMorte.setVolume(2);
+        rootNode.attachChild(audioMorte);
+
+        audioPassos = new AudioNode(assetManager, "Sounds/Passo", false);
+        audioPassos.setLooping(false);
+        audioPassos.setVolume(2);
+        rootNode.attachChild(audioPassos);
+
+        audioInicio = new AudioNode(assetManager, "Sounds/Inicio", false);
+        audioInicio.setLooping(true);
+        audioInicio.setPositional(true);
+        audioInicio.setLocalTranslation(Vector3f.ZERO.clone());
+        audioInicio.setVolume(3);
+        rootNode.attachChild(audioInicio);
+        audioInicio.play();
+    }
+
 }
