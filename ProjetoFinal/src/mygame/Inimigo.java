@@ -4,6 +4,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.post.FilterPostProcessor;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Sphere;
 
@@ -29,18 +30,20 @@ final class Inimigo {
         esfera.scale(0.4f, 0.4f, 0.4f);
 
         randomColor(cor, esferaM);
+       
     }
+    
 
     public void randomColor(int x, Material esferaM) {
         switch (x) {
             case 1:
-                esferaM.setColor("Color", ColorRGBA.Blue); //random color aqui
+                esferaM.setColor("Color", ColorRGBA.Blue); 
                 break;
             case 2:
-                esferaM.setColor("Color", ColorRGBA.Red); //random color aqui
+                esferaM.setColor("Color", ColorRGBA.Red); 
                 break;
             default:
-                esferaM.setColor("Color", ColorRGBA.Green); //random color aqui
+                esferaM.setColor("Color", ColorRGBA.Green); 
                 break;
         }
 

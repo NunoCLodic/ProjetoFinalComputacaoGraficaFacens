@@ -3,12 +3,13 @@ package mygame;
 //Classe que controle o sistema de Pontos, Vidas e Nível do Jogo
 public class Pontuacao {
 
-    public int score, vida, nivel;
+    public int score, vida, nivel, record;
  
     Pontuacao() {
         score = 0;
         vida = 5;
         nivel = 1;
+        record = 46;
     }
 //Método que recebe informação se houve colisão correta ou não e incremente ponto ou retira vida
 
@@ -42,6 +43,13 @@ public class Pontuacao {
         score = 0;
         vida = 5;
         nivel = 1;
+    }
+    
+    
+    public void maiorRecord(){
+        if(score > record){
+            record = score;
+        }
     }
 
 }
