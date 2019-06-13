@@ -25,12 +25,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class JogoTapete extends SimpleApplication {
 
     private Pontuacao pontuacao;
+
     private final boolean dir = true;
-    private Material esfera;
-    private Material colisao;
 
     private Inimigo inimigo;
     private Area area;
+    private Material esfera;
+    private Material colisao;
 
     private BitmapText hudText;
     private BitmapText hudText1;
@@ -57,10 +58,12 @@ public class JogoTapete extends SimpleApplication {
     boolean Aumentar = false;
     boolean Reiniciar = false;
     boolean jogoEmpausa = false;
+    boolean noPausa = false;
 
     int cor = 1;
     int corArea = 1;
 
+    //Main
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
         settings.setResolution(1200, 800);
@@ -82,15 +85,15 @@ public class JogoTapete extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        cam.setLocation(new Vector3f(-0.4f, -1, 22));
-        flyCam.setEnabled(false);
+
+        cam.setLocation(new Vector3f(-0.4f, 0f, 24f));
 
         criarTapete();
         criarPortaEntrada();
         criarPortaSaida();
         CriaImagens();
         CriaAlerta();
-//        MeusAudios();
+//      MeusAudios();
 
         esfera = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         pontuacao = new Pontuacao();
@@ -107,6 +110,7 @@ public class JogoTapete extends SimpleApplication {
         hudText9 = new BitmapText(guiFont, false);
         hudText10 = new BitmapText(guiFont, false);
         hudText11 = new BitmapText(guiFont, false);
+
         inputManager.addMapping("Iniciar", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addListener(actionListener, "Iniciar");
         inputManager.addMapping("Colisao", new KeyTrigger(KeyInput.KEY_SPACE));
@@ -131,8 +135,12 @@ public class JogoTapete extends SimpleApplication {
         inputManager.addListener(actionListener, "Ler");
         inputManager.addMapping("Sair", new KeyTrigger(KeyInput.KEY_S));
         inputManager.addListener(actionListener, "Sair");
-        area = new Area(pontuacao.nivel, assetManager, corArea);
+        inputManager.addMapping("Camera", new KeyTrigger(KeyInput.KEY_C));
+        inputManager.addListener(actionListener, "Camera");
+        inputManager.addMapping("CameraFixa", new KeyTrigger(KeyInput.KEY_F));
+        inputManager.addListener(actionListener, "CameraFixa");
 
+        area = new Area(pontuacao.nivel, assetManager, corArea);
     }
 
     @Override
@@ -145,6 +153,7 @@ public class JogoTapete extends SimpleApplication {
         guiNode.attachChild(hudText5);
 
         if (Iniciar == true) {
+
             inimigo = new Inimigo(pontuacao.nivel, assetManager, cor);
             Spatial s = rootNode.getChild("S1");
             if (s == null) {
@@ -154,7 +163,8 @@ public class JogoTapete extends SimpleApplication {
 
             hudText.setSize(guiFont.getCharSet().getRenderedSize());
             hudText.setColor(ColorRGBA.Green);
-            if (pontuacao.vida == 0) {
+
+            if (pontuacao.vida <= 0 || noPausa == true) {
                 hudText.setColor(ColorRGBA.Red);
             }
             hudText.setText("Nivel: " + pontuacao.nivel);
@@ -163,7 +173,7 @@ public class JogoTapete extends SimpleApplication {
 
             hudText1.setSize(guiFont.getCharSet().getRenderedSize());
             hudText1.setColor(ColorRGBA.Green);
-            if (pontuacao.vida == 0) {
+            if (pontuacao.vida <= 0 || noPausa == true) {
                 hudText1.setColor(ColorRGBA.Red);
             }
             hudText1.setText("" + pontuacao.score);
@@ -172,7 +182,7 @@ public class JogoTapete extends SimpleApplication {
 
             hudText2.setSize(guiFont.getCharSet().getRenderedSize());
             hudText2.setColor(ColorRGBA.Green);
-            if (pontuacao.vida == 0) {
+            if (pontuacao.vida <= 0 || noPausa == true) {
                 hudText2.setColor(ColorRGBA.Red);
             }
             hudText2.setText("" + pontuacao.vida);
@@ -190,32 +200,35 @@ public class JogoTapete extends SimpleApplication {
                     cor = ThreadLocalRandom.current().nextInt(1, 4);
                     pontuacao.vida--;
                 }
+                //Verifica a Area de Ponto
                 if ((s.getLocalTranslation().x > -1.9) && (s.getLocalTranslation().x < 1.3)) {
                     verificaArea = true;
                 } else {
                     verificaArea = false;
                 }
+                //Remover a Bola 
                 if (RemoveEsfera == true) {
                     s.removeFromParent();
                     RemoveEsfera = false;
                 }
-                if (pontuacao.nivel < 30) {
+                //Verifica nivel de aumento de velocidade
+                if (pontuacao.nivel < 20) {
                     s.move(tpf + pontuacao.nivel * 0.01f, 0, 0);
                 } else {
                     s.move(tpf + 3.0f, 0, 0);
                 }
-                if (pontuacao.vida == 0) {
+                //Verifica quando chamar GameOver
+                if (pontuacao.vida <= 0) {
                     if (Iniciar == true) {
                         GameOver();
                     }
                 }
                 if (Aumentar == true) {
-                    s.move(tpf + 1.0f, 0, 0);
+                    s.move(tpf + 1.1f, 0, 0);
                     Aumentar = false;
                 }
             }
         }
-
         listener.setLocation(cam.getLocation());
         listener.setRotation(cam.getRotation());
     }
@@ -224,8 +237,8 @@ public class JogoTapete extends SimpleApplication {
         @Override
         public void onAction(String name, boolean keyPressed, float tpf) {
 
+//*************************************AJUDA-(L)*******************************************************
             if (name.equals("Ler") && !keyPressed) {
-
                 hudText6.setSize(guiFont.getCharSet().getRenderedSize());
                 hudText7.setSize(guiFont.getCharSet().getRenderedSize());
                 hudText8.setSize(guiFont.getCharSet().getRenderedSize());
@@ -233,17 +246,17 @@ public class JogoTapete extends SimpleApplication {
                 hudText10.setSize(guiFont.getCharSet().getRenderedSize());
                 hudText11.setSize(guiFont.getCharSet().getRenderedSize());
 
-                hudText6.setColor(ColorRGBA.randomColor());
-                hudText7.setColor(ColorRGBA.randomColor());
-                hudText8.setColor(ColorRGBA.randomColor());
-                hudText9.setColor(ColorRGBA.randomColor());
+                hudText6.setColor(ColorRGBA.Yellow);
+                hudText7.setColor(ColorRGBA.Yellow);
+                hudText8.setColor(ColorRGBA.Yellow);
+                hudText9.setColor(ColorRGBA.Yellow);
                 hudText10.setColor(ColorRGBA.Red);
                 hudText11.setColor(ColorRGBA.White);
 
-                hudText6.setText(">> Ao Iniciar a partida 'I', irão sair varias bolas de diferentes cores, Nao deixe que nenhuma");
-                hudText7.setText("delas caim na fornalha, para isso terá de combinar a cor da bola com a cor do tapete");
+                hudText6.setText(">> Ao Iniciar a partida 'I', irao sair varias bolas de diferentes cores, nao deixe que nenhuma");
+                hudText7.setText("delas caiam na fornalha, para isso tera de combinar a cor da bola com a cor do tapete");
                 hudText8.setText("clicando no SPACE ou mouse esquerdo, podes aumentar os passos com a tecla 'A'");
-                hudText9.setText("ou com o scroll do mouse e pode ate mudar tambem as cores do tapete com tecla 'T' ou mouse direit <<");
+                hudText9.setText("ou com o scroll do mouse e pode ate mudar tambem as cores do tapete com tecla 'T' ou mouse direito <<");
                 hudText10.setText("S - 'Sair da Ajuda'");
                 hudText11.setText("*** Ajuda ***");
 
@@ -261,6 +274,7 @@ public class JogoTapete extends SimpleApplication {
                 guiNode.attachChild(hudText10);
                 guiNode.attachChild(hudText11);
             }
+//*************************************SAIR-(S)********************************************************
             if (name.equals("Sair") && !keyPressed) {
                 hudText6.setText("");
                 hudText7.setText("");
@@ -269,12 +283,13 @@ public class JogoTapete extends SimpleApplication {
                 hudText10.setText("");
                 hudText11.setText("");
             }
-
+//*************************************INICIAR-(I)*****************************************************
             if (name.equals("Iniciar") && !keyPressed) {
                 Iniciar = true;
             }
+//*************************************COMBINAR-(SPACE)************************************************            
             if ((name.equals("Colisao") && !keyPressed) || ((name.equals("Mouse") && !keyPressed))) {
-                if (verificaArea) {
+                if (verificaArea == true) {
                     if (cor == corArea) {
 //                        audioPonto.playInstance();
                         corArea = ThreadLocalRandom.current().nextInt(1, 4);
@@ -290,32 +305,51 @@ public class JogoTapete extends SimpleApplication {
                 RemoveEsfera = true;
                 cor = ThreadLocalRandom.current().nextInt(1, 4);
             }
-
+//*************************************PAUSA-(P)*******************************************************
             if (name.equals("Pausa") && !keyPressed) {
-                hudText4.setSize(guiFont.getCharSet().getRenderedSize());
-                hudText4.setColor(ColorRGBA.Pink);
-                hudText4.setText("Jogo Pausado..!");
-                hudText4.setLocalTranslation(630, hudText.getLineHeight() / 2 + 350, 20);
-                guiNode.attachChild(hudText4);
-                Iniciar = false;
-                jogoEmpausa = true;
+                if (noPausa == false && Iniciar == true) {
+                    hudText4.setSize(guiFont.getCharSet().getRenderedSize());
+                    hudText4.setColor(ColorRGBA.Pink);
+                    hudText4.setText("Jogo Pausado..!");
+                    hudText4.setLocalTranslation(630, hudText.getLineHeight() / 2 + 350, 20);
+                    guiNode.attachChild(hudText4);
+                    Iniciar = false;
+                    jogoEmpausa = true;
+                }
             }
+//*************************************RETOMAR-(R)*****************************************************           
             if (name.equals("Retomar") && !keyPressed) {
-                if (Iniciar == false) {
+                if (Iniciar == false && jogoEmpausa == true) {
                     hudText4.setText("");
                     Iniciar = true;
                 }
             }
+//*************************************REINICIAR-(N)***************************************************            
             if (name.equals("Reinicia") && !keyPressed) {
-                Reiniciar();
-            }
+                hudText3.setSize(guiFont.getCharSet().getRenderedSize());
+                hudText3.setColor(ColorRGBA.Red);
+                hudText3.setText("");
+                hudText3.setLocalTranslation(655, hudText.getLineHeight() / 2 + 350, 20);
+                guiNode.attachChild(hudText3);
 
+                hudText4.setSize(guiFont.getCharSet().getRenderedSize());
+                hudText4.setColor(ColorRGBA.Pink);
+                hudText4.setText("");
+                hudText4.setLocalTranslation(655, hudText.getLineHeight() / 2 + 350, 20);
+                guiNode.attachChild(hudText4);
+
+                pontuacao.reiniciaJogo();
+                Iniciar = true;
+                noPausa = false;
+            }
+//*************************************AUMENTA_PASSO-(A)***********************************************
             if ((name.equals("AumentaVelocidade") && !keyPressed) || (name.equals("MouseA"))) {
                 //audioPassos.playInstance();
                 Aumentar = true;
             }
+//*************************************TROCA_COR-(T)***************************************************           
             if ((name.equals("Troca")) || (name.equals("MouseT") && !keyPressed)) {
-                System.out.println("abertdo" + corArea);
+                System.out.println("aberto" + corArea);
                 corArea += 1;
                 area.cor = corArea;
                 if (corArea == 4) {
@@ -323,10 +357,22 @@ public class JogoTapete extends SimpleApplication {
                 }
                 area.trocaCor(corArea);
             }
+//*************************************CAMERAS_FIXA***************************************************           
+
+            if (name.equals("CameraFixa") && !keyPressed) {
+                flyCam.setEnabled(false);
+            }
+            if (name.equals("Camera") && !keyPressed) {
+                flyCam.setEnabled(true);
+            }
+
         }
     };
 
-//Criação da Tapete rolante
+    //******************************************   ****************************************************
+    //                                        FUNCOES
+    //******************************************   ****************************************************
+    //Criação da Tapete rolante
     public void criarTapete() {
         //tapete
         Box floor = new Box(1f, 1f, 1f);
@@ -352,14 +398,14 @@ public class JogoTapete extends SimpleApplication {
         rootNode.attachChild(tapete1);
     }
 
-//Criação da porta de entrada dos objetos
+    //Criação da porta de entrada dos objetos
     public void criarPortaEntrada() {
         Box portaEntrada = new Box(1f, 1f, 1f);
         portaEntrada.updateGeometry(new Vector3f(0f, 0f, 0f), new Vector3f(1f, 3f, 4.5f));
         Geometry geom = new Geometry("Box", portaEntrada);
         geom.move(-10f, -3.2f, -2.5f);
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        Texture tex = assetManager.loadTexture("Textures/Porta.png");
+        Texture tex = assetManager.loadTexture("Textures/PortaBola.jpg");
         mat.setTexture("ColorMap", tex);
         geom.setMaterial(mat);
         rootNode.attachChild(geom);
@@ -374,7 +420,7 @@ public class JogoTapete extends SimpleApplication {
         rootNode.attachChild(geomBola);
     }
 
-//Criação da porta de saida dos objetos
+    //Criação da porta de saida dos objetos
     public void criarPortaSaida() {
         Box portaSaida = new Box(1f, 1f, 1f);
         portaSaida.updateGeometry(new Vector3f(0f, 0f, 0f), new Vector3f(1f, 3f, 4.5f));
@@ -414,7 +460,7 @@ public class JogoTapete extends SimpleApplication {
         rootNode.attachChild(geom3);
     }
 
-//Criaçao das imagens
+    //Criaçao das imagens
     public void CriaImagens() {
         Picture vida = new Picture("HUD Picture");
         vida.setImage(assetManager, "Imagens/Coracao.png", true);
@@ -433,13 +479,12 @@ public class JogoTapete extends SimpleApplication {
         Picture facens = new Picture("HUD Picture");
         facens.setImage(assetManager, "Imagens/facens.png", true);
         facens.setWidth(settings.getWidth() / 20);
-        facens.setHeight(settings.getHeight() / 15);
+        facens.setHeight(settings.getHeight() / 12);
         facens.setPosition((settings.getWidth() / 2 - 750) + 80, (settings.getHeight() / 2) + 100);
         guiNode.attachChild(facens);
-
     }
 
-//Criação de alerta
+    //Criação de alerta
     public void CriaAlerta() {
         BitmapText Alerta1 = new BitmapText(guiFont, true);
         BitmapText Alerta2 = new BitmapText(guiFont, true);
@@ -448,6 +493,9 @@ public class JogoTapete extends SimpleApplication {
         BitmapText Alerta5 = new BitmapText(guiFont, true);
         BitmapText Alerta6 = new BitmapText(guiFont, true);
         BitmapText Alerta7 = new BitmapText(guiFont, true);
+        BitmapText Alerta8 = new BitmapText(guiFont, true);
+        BitmapText Alerta9 = new BitmapText(guiFont, true);
+        BitmapText Alerta10 = new BitmapText(guiFont, true);
         Alerta1.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta2.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta3.setSize(guiFont.getCharSet().getRenderedSize());
@@ -455,6 +503,9 @@ public class JogoTapete extends SimpleApplication {
         Alerta5.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta6.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta7.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta8.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta9.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta10.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta1.setColor(ColorRGBA.Yellow);
         Alerta2.setColor(ColorRGBA.Cyan);
         Alerta3.setColor(ColorRGBA.Blue);
@@ -462,6 +513,9 @@ public class JogoTapete extends SimpleApplication {
         Alerta5.setColor(ColorRGBA.Magenta);
         Alerta6.setColor(ColorRGBA.Orange);
         Alerta7.setColor(ColorRGBA.White);
+        Alerta8.setColor(ColorRGBA.Blue);
+        Alerta9.setColor(ColorRGBA.Yellow);
+        Alerta10.setColor(ColorRGBA.Orange);
         Alerta1.setText("I - 'Inicia o jogo'");
         Alerta2.setText("T - 'Troca cor area'");
         Alerta3.setText("A - 'Aumenta passos'");
@@ -469,13 +523,19 @@ public class JogoTapete extends SimpleApplication {
         Alerta5.setText("R - 'Retoma o jogo'");
         Alerta6.setText("SPACE - 'Combina as cores'");
         Alerta7.setText("L - 'Ajuda!'");
-        Alerta1.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 120), 2);
-        Alerta2.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 100), 2);
-        Alerta3.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 80), 2);
-        Alerta4.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 60), 2);
-        Alerta5.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 40), 2);
-        Alerta6.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 20), 2);
-        Alerta7.setLocalTranslation(1100, (Alerta1.getLineWidth() / 4 + 500), 2);
+        Alerta8.setText("N - 'Reiniciar Partida'");
+        Alerta9.setText("F - 'Fixar a Camera");
+        Alerta10.setText("C - 'Camera a Movimentar'");
+        Alerta1.setLocalTranslation(1150, (Alerta1.getLineWidth() / 4 + 120), 2);
+        Alerta2.setLocalTranslation(1150, (Alerta1.getLineWidth() / 4 + 100), 2);
+        Alerta3.setLocalTranslation(1150, (Alerta1.getLineWidth() / 4 + 80), 2);
+        Alerta4.setLocalTranslation(1150, (Alerta1.getLineWidth() / 4 + 60), 2);
+        Alerta5.setLocalTranslation(1150, (Alerta1.getLineWidth() / 4 + 40), 2);
+        Alerta6.setLocalTranslation(1150, (Alerta1.getLineWidth() / 4 + 20), 2);
+        Alerta7.setLocalTranslation(1150, (Alerta1.getLineWidth() / 4 + 500), 2);
+        Alerta8.setLocalTranslation(1150, (Alerta1.getLineWidth() / 4 + 520), 2);
+        Alerta9.setLocalTranslation(1150, (Alerta1.getLineWidth() / 4 + 540), 2);
+        Alerta10.setLocalTranslation(1150, (Alerta1.getLineWidth() / 4 + 560), 2);
         guiNode.attachChild(Alerta1);
         guiNode.attachChild(Alerta2);
         guiNode.attachChild(Alerta3);
@@ -483,9 +543,12 @@ public class JogoTapete extends SimpleApplication {
         guiNode.attachChild(Alerta5);
         guiNode.attachChild(Alerta6);
         guiNode.attachChild(Alerta7);
+        guiNode.attachChild(Alerta8);
+        guiNode.attachChild(Alerta9);
+        guiNode.attachChild(Alerta10);
     }
 
-//Game Over
+    //Game Over
     public void GameOver() {
         hudText3.setSize(guiFont.getCharSet().getRenderedSize());
         hudText3.setColor(ColorRGBA.Red);
@@ -494,26 +557,8 @@ public class JogoTapete extends SimpleApplication {
         hudText3.setLocalTranslation(622, hudText.getLineHeight() / 2 + 350, 20);
         guiNode.attachChild(hudText3);
 //        audioMorte.playInstance();
-
         Iniciar = false;
-    }
-//Reinicia a partida
-
-    public void Reiniciar() {
-        hudText3.setSize(guiFont.getCharSet().getRenderedSize());
-        hudText3.setColor(ColorRGBA.Red);
-        hudText3.setText("");
-        hudText3.setLocalTranslation(655, hudText.getLineHeight() / 2 + 350, 20);
-        guiNode.attachChild(hudText3);
-
-        hudText4.setSize(guiFont.getCharSet().getRenderedSize());
-        hudText4.setColor(ColorRGBA.Pink);
-        hudText4.setText("");
-        hudText4.setLocalTranslation(655, hudText.getLineHeight() / 2 + 350, 20);
-        guiNode.attachChild(hudText4);
-
-        pontuacao.reiniciaJogo();
-        Iniciar = true;
+        noPausa = true;
     }
 
     //Funcao para audios
@@ -546,5 +591,4 @@ public class JogoTapete extends SimpleApplication {
         rootNode.attachChild(audioInicio);
         audioInicio.play();
     }
-
 }

@@ -1,0 +1,5 @@
+//                if ((s.getLocalTranslation().x > -1.9) && (s.getLocalTranslation().x < 1.3)) {
+//                    verificaArea = true;
+//                } else {
+//                    verificaArea = false;
+//                }
