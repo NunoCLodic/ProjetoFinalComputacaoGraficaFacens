@@ -48,7 +48,8 @@ public class JogoTapete extends SimpleApplication {
     private BitmapText hudText11;
 
     private AudioNode audioFogo;
-    private AudioNode audioPonto;
+    private AudioNode audioPontoMais;
+    private AudioNode audioPontoMenos;
     private AudioNode audioMorte;
     private AudioNode audioPassos;
     private AudioNode audioInicio;
@@ -99,7 +100,7 @@ public class JogoTapete extends SimpleApplication {
         criarPortaSaida();
         CriaImagens();
         CriaAlerta();
-//        MeusAudios();
+        MeusAudios();
 
         esfera = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         pontuacao = new Pontuacao();
@@ -119,13 +120,13 @@ public class JogoTapete extends SimpleApplication {
 
         inputManager.addMapping("Iniciar", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addListener(actionListener, "Iniciar");
-        inputManager.addMapping("Colisao", new KeyTrigger(KeyInput.KEY_SPACE));
+        inputManager.addMapping("Colisao", new KeyTrigger(KeyInput.KEY_ADD));
         inputManager.addListener(actionListener, "Colisao");
         inputManager.addMapping("Retomar", new KeyTrigger(KeyInput.KEY_R));
         inputManager.addListener(actionListener, "Retomar");
         inputManager.addMapping("Pausa", new KeyTrigger(KeyInput.KEY_P));
         inputManager.addListener(actionListener, "Pausa");
-        inputManager.addMapping("Troca", new KeyTrigger(KeyInput.KEY_T));
+        inputManager.addMapping("Troca", new KeyTrigger(KeyInput.KEY_NUMPAD0));
         inputManager.addListener(actionListener, "Troca");
         inputManager.addMapping("AumentaVelocidade", new KeyTrigger(KeyInput.KEY_TAB));
         inputManager.addListener(actionListener, "AumentaVelocidade");
@@ -159,6 +160,7 @@ public class JogoTapete extends SimpleApplication {
         guiNode.attachChild(hudText5);
 
         if (Iniciar == true) {
+            sonInicio();
 
             inimigo = new Inimigo(pontuacao.nivel, assetManager, cor);
             Spatial s = rootNode.getChild("S1");
@@ -200,7 +202,7 @@ public class JogoTapete extends SimpleApplication {
             if (dir == true) {
 
                 if (s.getLocalTranslation().x > 7) {
-//                    audioFogo.playInstance();
+                    sonFogo();
                     s.removeFromParent();
                     rootNode.detachChild(s);
                     cor = ThreadLocalRandom.current().nextInt(1, 4);
@@ -267,8 +269,8 @@ public class JogoTapete extends SimpleApplication {
 
                 hudText6.setText(">> Ao Iniciar a partida 'I', irao sair varias bolas de diferentes cores, nao deixe que nenhuma");
                 hudText7.setText("delas caiam na fornalha, para isso tera de combinar a cor da bola com a cor do tapete");
-                hudText8.setText("clicando no SPACE ou mouse esquerdo, podes aumentar os passos com a no TAB");
-                hudText9.setText("ou com o scroll do mouse e pode ate mudar tambem as cores do tapete com tecla 'T' ou mouse direito <<");
+                hudText8.setText("clicando no + ou mouse esquerdo, podes aumentar os passos com a no TAB");
+                hudText9.setText("ou com o scroll do mouse e pode ate mudar tambem as cores do tapete com tecla '0' ou mouse direito <<");
                 hudText10.setText("E - 'Sair da Ajuda'");
                 hudText11.setText("*** Ajuda ***");
 
@@ -303,16 +305,18 @@ public class JogoTapete extends SimpleApplication {
             if ((name.equals("Colisao") && !keyPressed) || ((name.equals("Mouse") && !keyPressed))) {
                 if (verificaArea == true) {
                     if (cor == corArea) {
-//                        audioPonto.playInstance();
+                        sonPontomais();
                         corArea = ThreadLocalRandom.current().nextInt(1, 4);
                         area = new Area(pontuacao.nivel, assetManager, corArea);
                         pontuacao.controlePontos(true);
                         RemoveEsfera = true;
                     } else {
                         pontuacao.controlePontos(false);
+                        sonPontomenos();
                     }
                 } else {
                     pontuacao.controlePontos(false);
+                    sonPontomenos();
                 }
                 RemoveEsfera = true;
                 cor = ThreadLocalRandom.current().nextInt(1, 4);
@@ -359,11 +363,11 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************AUMENTA_PASSO-(A)***********************************************
             if ((name.equals("AumentaVelocidade") && !keyPressed) || (name.equals("MouseA"))) {
-                //audioPassos.playInstance();
+                sonPasso();
                 Aumentar = true;
             }
 //*************************************TROCA_COR-(T)***************************************************           
-            if ((name.equals("Troca")) || (name.equals("MouseT") && !keyPressed)) {
+            if ((name.equals("Troca") && !keyPressed) || (name.equals("MouseT") && !keyPressed)) {
                 System.out.println("aberto" + corArea);
                 corArea += 1;
                 area.cor = corArea;
@@ -373,25 +377,24 @@ public class JogoTapete extends SimpleApplication {
                 area.trocaCor(corArea);
             }
 //*************************************CAMERAS_FIXA(f),(c)***************************************************           
-            //camera fixa (f)
-
             Picture Direcoes = new Picture("HUD Picture");
 
             //camera solta (C)
             if (name.equals("Camera") && !keyPressed) {
                 flyCam.setEnabled(true);
-                cameraSolta = false;
                 if (cameraSolta == false) {
                     Direcoes.setImage(assetManager, "Imagens/Direcoes.PNG", true);
                     Direcoes.setWidth(settings.getWidth() / 6);
                     Direcoes.setHeight(settings.getHeight() / 11);
                     Direcoes.setPosition((settings.getWidth() / 2 - 760) + 80, (settings.getHeight() / 4) + 300);
                     guiNode.attachChild(Direcoes);
+                } else {
+
                 }
             }
+            //camera fixa (f)
             if (name.equals("CameraFixa") && !keyPressed) {
                 flyCam.setEnabled(false);
-                Direcoes.clearMatParamOverrides();
                 cameraSolta = true;
             }
             //Captura de tela (K)
@@ -551,11 +554,11 @@ public class JogoTapete extends SimpleApplication {
         Alerta9.setColor(ColorRGBA.Yellow);
         Alerta10.setColor(ColorRGBA.Orange);
         Alerta1.setText("I - 'Inicia o jogo'");
-        Alerta2.setText("T - 'Troca cor area'");
+        Alerta2.setText("0 - 'Troca cor area'");
         Alerta3.setText("TAB - 'Aumenta o passo'");
         Alerta4.setText("P - 'Pausa o jogo'");
         Alerta5.setText("R - 'Retoma o jogo'");
-        Alerta6.setText("SPACE - 'Combina as cores'");
+        Alerta6.setText("+ - 'Combina as cores'");
         Alerta7.setText("L - 'Ajuda!'");
         Alerta8.setText("N - 'Reiniciar a Partida'");
         Alerta9.setText("F - 'Fixar a camera");
@@ -584,6 +587,7 @@ public class JogoTapete extends SimpleApplication {
 
     //Game Over
     public void GameOver() {
+        sonMorte();
         hudText3.setSize(guiFont.getCharSet().getRenderedSize());
         hudText3.setColor(ColorRGBA.Red);
         hudText3.center();
@@ -601,26 +605,48 @@ public class JogoTapete extends SimpleApplication {
     //Funcao para audios
     public void MeusAudios() {
         audioFogo = new AudioNode(assetManager, "Sounds/Fogo.wav", AudioData.DataType.Buffer);
+        audioPontoMais = new AudioNode(assetManager, "Sounds/Ponto.wav", AudioData.DataType.Buffer);
+        audioPontoMenos = new AudioNode(assetManager, "Sounds/Falhaponto.wav", AudioData.DataType.Buffer);
+        audioMorte = new AudioNode(assetManager, "Sounds/Morte.wav", AudioData.DataType.Buffer);
+        audioPassos = new AudioNode(assetManager, "Sounds/Passo.wav", AudioData.DataType.Buffer);
+        audioInicio = new AudioNode(assetManager, "Sounds/Inicio.wav", AudioData.DataType.Buffer);
+    }
+
+    private void sonFogo() {
         audioFogo.setLooping(false);
         audioFogo.setVolume(2);
         rootNode.attachChild(audioFogo);
+        audioFogo.play();
+    }
 
-        audioPonto = new AudioNode(assetManager, "Sounds/Ponto.wav", AudioData.DataType.Buffer);
-        audioPonto.setLooping(false);
-        audioPonto.setVolume(2);
-        rootNode.attachChild(audioPonto);
+    private void sonPontomais() {
+        audioPontoMais.setLooping(false);
+        audioPontoMais.setVolume(2);
+        rootNode.attachChild(audioPontoMais);
+        audioPontoMais.play();
+    }
 
-        audioMorte = new AudioNode(assetManager, "Sounds/Morte.wav", AudioData.DataType.Buffer);
+    private void sonPontomenos() {
+        audioPontoMenos.setLooping(false);
+        audioPontoMenos.setVolume(2);
+        rootNode.attachChild(audioPontoMenos);
+        audioPontoMenos.play();
+    }
+
+    private void sonMorte() {
         audioMorte.setLooping(false);
         audioMorte.setVolume(2);
         rootNode.attachChild(audioMorte);
+    }
 
-        audioPassos = new AudioNode(assetManager, "Sounds/Passo.wav", AudioData.DataType.Buffer);
+    private void sonPasso() {
         audioPassos.setLooping(false);
         audioPassos.setVolume(2);
         rootNode.attachChild(audioPassos);
+        audioPassos.play();
+    }
 
-        audioInicio = new AudioNode(assetManager, "Sounds/Inicio.wav", AudioData.DataType.Buffer);
+    private void sonInicio() {
         audioInicio.setLooping(true);
         audioInicio.setPositional(true);
         audioInicio.setLocalTranslation(Vector3f.ZERO.clone());
