@@ -46,13 +46,17 @@ public class JogoTapete extends SimpleApplication {
     private BitmapText hudText9;
     private BitmapText hudText10;
     private BitmapText hudText11;
+    private BitmapText hudText12;
 
     private AudioNode audioFogo;
     private AudioNode audioPontoMais;
     private AudioNode audioPontoMenos;
     private AudioNode audioMorte;
     private AudioNode audioPassos;
-    private AudioNode audioInicio;
+    private AudioNode audioInicio1;
+    private AudioNode audioInicio2;
+    private AudioNode audioPause;
+    private AudioNode audioPreInicio;
 
     boolean RemoveEsfera = false;
     boolean Iniciar = false;
@@ -101,6 +105,7 @@ public class JogoTapete extends SimpleApplication {
         CriaImagens();
         CriaAlerta();
         MeusAudios();
+        sonPreInicio();
 
         esfera = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         pontuacao = new Pontuacao();
@@ -117,6 +122,14 @@ public class JogoTapete extends SimpleApplication {
         hudText9 = new BitmapText(guiFont, false);
         hudText10 = new BitmapText(guiFont, false);
         hudText11 = new BitmapText(guiFont, false);
+        hudText12 = new BitmapText(guiFont, false);
+
+        hudText12.setSize(guiFont.getCharSet().getRenderedSize());
+        hudText12.setColor(ColorRGBA.Red);
+        hudText12.setLocalTranslation(70, hudText.getLineHeight() / 2 + 400, 20);
+        hudText12.setText("Camera solta");
+        guiNode.attachChild(hudText12);
+
 
         inputManager.addMapping("Iniciar", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addListener(actionListener, "Iniciar");
@@ -160,7 +173,9 @@ public class JogoTapete extends SimpleApplication {
         guiNode.attachChild(hudText5);
 
         if (Iniciar == true) {
-            sonInicio();
+            sonInicio1();
+            sonInicio2();
+            audioPreInicio.pause();
 
             inimigo = new Inimigo(pontuacao.nivel, assetManager, cor);
             Spatial s = rootNode.getChild("S1");
@@ -253,6 +268,7 @@ public class JogoTapete extends SimpleApplication {
 
 //*************************************AJUDA-(L)*******************************************************
             if (name.equals("Ler") && !keyPressed) {
+
                 hudText6.setSize(guiFont.getCharSet().getRenderedSize());
                 hudText7.setSize(guiFont.getCharSet().getRenderedSize());
                 hudText8.setSize(guiFont.getCharSet().getRenderedSize());
@@ -274,12 +290,12 @@ public class JogoTapete extends SimpleApplication {
                 hudText10.setText("E - 'Sair da Ajuda'");
                 hudText11.setText("*** Ajuda ***");
 
-                hudText11.setLocalTranslation(630, hudText.getLineHeight() / 2 + 200, 20);
                 hudText6.setLocalTranslation(375, hudText.getLineHeight() / 2 + 160, 20);
                 hudText7.setLocalTranslation(380, hudText.getLineHeight() / 2 + 140, 20);
                 hudText8.setLocalTranslation(381, hudText.getLineHeight() / 2 + 120, 20);
                 hudText9.setLocalTranslation(330, hudText.getLineHeight() / 2 + 100, 20);
                 hudText10.setLocalTranslation(620, hudText.getLineHeight() / 2 + 40, 20);
+                hudText11.setLocalTranslation(630, hudText.getLineHeight() / 2 + 200, 20);
 
                 guiNode.attachChild(hudText6);
                 guiNode.attachChild(hudText7);
@@ -287,6 +303,7 @@ public class JogoTapete extends SimpleApplication {
                 guiNode.attachChild(hudText9);
                 guiNode.attachChild(hudText10);
                 guiNode.attachChild(hudText11);
+
             }
 //*************************************SAIR-(S)********************************************************
             if (name.equals("Sair") && !keyPressed) {
@@ -303,27 +320,34 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************COMBINAR-(SPACE)************************************************            
             if ((name.equals("Colisao") && !keyPressed) || ((name.equals("Mouse") && !keyPressed))) {
-                if (verificaArea == true) {
-                    if (cor == corArea) {
-                        sonPontomais();
-                        corArea = ThreadLocalRandom.current().nextInt(1, 4);
-                        area = new Area(pontuacao.nivel, assetManager, corArea);
-                        pontuacao.controlePontos(true);
-                        RemoveEsfera = true;
+                if (Iniciar == true) {
+                    if (verificaArea == true) {
+                        if (cor == corArea) {
+                            sonPontomais();
+                            corArea = ThreadLocalRandom.current().nextInt(1, 4);
+                            area = new Area(pontuacao.nivel, assetManager, corArea);
+                            pontuacao.controlePontos(true);
+                            RemoveEsfera = true;
+                        } else {
+                            pontuacao.controlePontos(false);
+                            sonPontomenos();
+                        }
                     } else {
                         pontuacao.controlePontos(false);
                         sonPontomenos();
                     }
-                } else {
-                    pontuacao.controlePontos(false);
-                    sonPontomenos();
+                    RemoveEsfera = true;
+                    cor = ThreadLocalRandom.current().nextInt(1, 4);
                 }
-                RemoveEsfera = true;
-                cor = ThreadLocalRandom.current().nextInt(1, 4);
             }
 //*************************************PAUSA-(P)*******************************************************
             if (name.equals("Pausa") && !keyPressed) {
+
                 if (noPausa == false && Iniciar == true) {
+                    sonPause();
+                    audioInicio1.pause();
+                    audioInicio2.pause();
+
                     hudText4.setSize(guiFont.getCharSet().getRenderedSize());
                     hudText4.setColor(ColorRGBA.Pink);
                     hudText4.setText("Jogo Pausado..!");
@@ -336,12 +360,19 @@ public class JogoTapete extends SimpleApplication {
 //*************************************RETOMAR-(R)*****************************************************           
             if (name.equals("Retomar") && !keyPressed) {
                 if (Iniciar == false && jogoEmpausa == true) {
+                    audioPause.pause();
+                    audioInicio1.play();
+                    audioInicio2.play();
+
                     hudText4.setText("");
                     Iniciar = true;
                 }
             }
 //*************************************REINICIAR-(N)***************************************************            
             if (name.equals("Reinicia") && !keyPressed) {
+
+                audioMorte.pause();
+
                 hudText3.setSize(guiFont.getCharSet().getRenderedSize());
                 hudText3.setColor(ColorRGBA.Red);
                 hudText3.setText("");
@@ -363,8 +394,10 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************AUMENTA_PASSO-(A)***********************************************
             if ((name.equals("AumentaVelocidade") && !keyPressed) || (name.equals("MouseA"))) {
-                sonPasso();
-                Aumentar = true;
+                if (Iniciar == true) {
+                    sonPasso();
+                    Aumentar = true;
+                }
             }
 //*************************************TROCA_COR-(T)***************************************************           
             if ((name.equals("Troca") && !keyPressed) || (name.equals("MouseT") && !keyPressed)) {
@@ -377,31 +410,18 @@ public class JogoTapete extends SimpleApplication {
                 area.trocaCor(corArea);
             }
 //*************************************CAMERAS_FIXA(f),(c)***************************************************           
-            Picture Direcoes = new Picture("HUD Picture");
-
             //camera solta (C)
             if (name.equals("Camera") && !keyPressed) {
-                flyCam.setEnabled(true);
-                if (cameraSolta == false) {
-                    Direcoes.setImage(assetManager, "Imagens/Direcoes.PNG", true);
-                    Direcoes.setWidth(settings.getWidth() / 6);
-                    Direcoes.setHeight(settings.getHeight() / 11);
-                    Direcoes.setPosition((settings.getWidth() / 2 - 760) + 80, (settings.getHeight() / 4) + 300);
-                    guiNode.attachChild(Direcoes);
-                } else {
+                flyCam.setEnabled(true);              
+                hudText12.setText("Camera solta");
 
-                }
             }
             //camera fixa (f)
             if (name.equals("CameraFixa") && !keyPressed) {
                 flyCam.setEnabled(false);
+                hudText12.setText("Camera fixa");
                 cameraSolta = true;
             }
-            //Captura de tela (K)
-            if (name.equals("Cptela") && !keyPressed) {
-
-            }
-
         }
     };
 
@@ -519,6 +539,13 @@ public class JogoTapete extends SimpleApplication {
         facens.setPosition((settings.getWidth() / 2 - 830) + 80, (settings.getHeight() / 2) + 100);
         guiNode.attachChild(facens);
 
+        Picture Direcoes = new Picture("HUD Picture");
+        Direcoes.setImage(assetManager, "Imagens/Direcoes.PNG", true);
+        Direcoes.setWidth(settings.getWidth() / 8);
+        Direcoes.setHeight(settings.getHeight() / 14);
+        Direcoes.setPosition((settings.getWidth() / 2 - 900) + 80, (settings.getHeight() / 4) + 190);
+        guiNode.attachChild(Direcoes);
+
     }
 
     //Criação de alerta
@@ -588,18 +615,19 @@ public class JogoTapete extends SimpleApplication {
     //Game Over
     public void GameOver() {
         sonMorte();
+        audioInicio2.pause();
+        audioInicio1.pause();
+
         hudText3.setSize(guiFont.getCharSet().getRenderedSize());
         hudText3.setColor(ColorRGBA.Red);
         hudText3.center();
         hudText3.setText("..GAME OVER..");
         hudText3.setLocalTranslation(622, hudText.getLineHeight() / 2 + 350, 20);
         guiNode.attachChild(hudText3);
-//        audioMorte.playInstance();
         Iniciar = false;
         noPausa = true;
 
         flyCam.setEnabled(false);
-
     }
 
     //Funcao para audios
@@ -609,49 +637,83 @@ public class JogoTapete extends SimpleApplication {
         audioPontoMenos = new AudioNode(assetManager, "Sounds/Falhaponto.wav", AudioData.DataType.Buffer);
         audioMorte = new AudioNode(assetManager, "Sounds/Morte.wav", AudioData.DataType.Buffer);
         audioPassos = new AudioNode(assetManager, "Sounds/Passo.wav", AudioData.DataType.Buffer);
-        audioInicio = new AudioNode(assetManager, "Sounds/Inicio.wav", AudioData.DataType.Buffer);
+        audioInicio1 = new AudioNode(assetManager, "Sounds/Inicio.wav", AudioData.DataType.Buffer);
+        audioInicio2 = new AudioNode(assetManager, "Sounds/Inicio2.wav", AudioData.DataType.Buffer);
+        audioPause = new AudioNode(assetManager, "Sounds/Pausa.wav", AudioData.DataType.Buffer);
+        audioPreInicio = new AudioNode(assetManager, "Sounds/PreInicio.wav", AudioData.DataType.Buffer);
+    }
+
+    private void sonPreInicio() {
+        audioPreInicio.setLooping(true);
+        audioPreInicio.setPositional(true);
+        audioPreInicio.setLocalTranslation(Vector3f.ZERO.clone());
+        audioPreInicio.setVolume(3);
+        audioPreInicio.attachChild(audioPause);
+        audioPreInicio.play();
+
+    }
+
+    private void sonPause() {
+        audioPause.setLooping(true);
+        audioPause.setPositional(true);
+        audioPause.setLocalTranslation(Vector3f.ZERO.clone());
+        audioPause.setVolume(3);
+        rootNode.attachChild(audioPause);
+        audioPause.play();
+    }
+
+    private void sonInicio2() {
+        audioInicio2.setLooping(true);
+        audioInicio2.setPositional(true);
+        audioInicio2.setLocalTranslation(Vector3f.ZERO.clone());
+        audioInicio2.setVolume(3);
+        rootNode.attachChild(audioInicio2);
+        audioInicio2.play();
     }
 
     private void sonFogo() {
         audioFogo.setLooping(false);
         audioFogo.setVolume(2);
         rootNode.attachChild(audioFogo);
-        audioFogo.play();
+        audioFogo.playInstance();
     }
 
     private void sonPontomais() {
         audioPontoMais.setLooping(false);
         audioPontoMais.setVolume(2);
         rootNode.attachChild(audioPontoMais);
-        audioPontoMais.play();
+        audioPontoMais.playInstance();
     }
 
     private void sonPontomenos() {
         audioPontoMenos.setLooping(false);
         audioPontoMenos.setVolume(2);
         rootNode.attachChild(audioPontoMenos);
-        audioPontoMenos.play();
-    }
-
-    private void sonMorte() {
-        audioMorte.setLooping(false);
-        audioMorte.setVolume(2);
-        rootNode.attachChild(audioMorte);
+        audioPontoMenos.playInstance();
     }
 
     private void sonPasso() {
         audioPassos.setLooping(false);
         audioPassos.setVolume(2);
         rootNode.attachChild(audioPassos);
-        audioPassos.play();
+        audioPassos.playInstance();
     }
 
-    private void sonInicio() {
-        audioInicio.setLooping(true);
-        audioInicio.setPositional(true);
-        audioInicio.setLocalTranslation(Vector3f.ZERO.clone());
-        audioInicio.setVolume(3);
-        rootNode.attachChild(audioInicio);
-        audioInicio.play();
+    private void sonMorte() {
+        audioMorte.setLooping(true);
+        audioMorte.setPositional(true);
+        audioMorte.setLocalTranslation(Vector3f.ZERO.clone());
+        audioMorte.setVolume(2);
+        rootNode.attachChild(audioMorte);
+        audioMorte.play();
+    }
+
+    private void sonInicio1() {
+        audioInicio1.setLooping(true);
+        audioInicio1.setPositional(true);
+        audioInicio1.setLocalTranslation(Vector3f.ZERO.clone());
+        audioInicio1.setVolume(0.3f);
+        rootNode.attachChild(audioInicio1);
+        audioInicio1.play();
     }
 }
