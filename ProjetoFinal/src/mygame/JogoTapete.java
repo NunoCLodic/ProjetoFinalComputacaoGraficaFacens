@@ -810,7 +810,7 @@ public class JogoTapete extends SimpleApplication {
     public void GameOver() {
         if (sonLigado == false) {
             audioMorte.setVolume(0);
-             audioInicio.stop();
+            audioInicio.stop();
         }
         if (sonLigado == true) {
             audioMorte.play();
@@ -862,15 +862,6 @@ public class JogoTapete extends SimpleApplication {
         audioPreInicio.play();
     }
 
-    private void sonPause() {
-        audioPause.setLooping(true);
-        audioPause.setPositional(true);
-        audioPause.setLocalTranslation(Vector3f.ZERO.clone());
-        audioPause.setVolume(3);
-        rootNode.attachChild(audioPause);
-        audioPause.play();
-    }
-
     private void sonFogo() {
         audioFogo.setLooping(false);
         rootNode.attachChild(audioFogo);
@@ -893,14 +884,6 @@ public class JogoTapete extends SimpleApplication {
         audioPassos.setLooping(false);
         rootNode.attachChild(audioPassos);
         audioPassos.playInstance();
-    }
-
-    private void sonMorte() {
-        audioMorte.setLooping(true);
-        audioMorte.setPositional(true);
-        audioMorte.setLocalTranslation(Vector3f.ZERO.clone());
-        rootNode.attachChild(audioMorte);
-        audioMorte.play();
     }
 
     public void silencioGeral() {
