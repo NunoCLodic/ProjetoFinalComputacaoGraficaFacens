@@ -61,6 +61,7 @@ public class JogoTapete extends SimpleApplication {
     private BitmapText hudText10;
     private BitmapText hudText11;
     private BitmapText hudText12;
+    private BitmapText hudText13;
 
     private AudioNode audioFogo;
     private AudioNode audioPontoMais;
@@ -162,12 +163,19 @@ public class JogoTapete extends SimpleApplication {
         hudText10 = new BitmapText(guiFont, false);
         hudText11 = new BitmapText(guiFont, false);
         hudText12 = new BitmapText(guiFont, false);
+        hudText13 = new BitmapText(guiFont, false);
 
         hudText12.setSize(guiFont.getCharSet().getRenderedSize());
         hudText12.setColor(ColorRGBA.Red);
         hudText12.setLocalTranslation(70, hudText.getLineHeight() / 2 + 400, 20);
         hudText12.setText("Camera solta");
         guiNode.attachChild(hudText12);
+
+        hudText13.setSize(guiFont.getCharSet().getRenderedSize());
+        hudText13.setColor(ColorRGBA.Red);
+        hudText13.setText("Son ligado");
+        hudText13.setLocalTranslation(78, hudText.getLineHeight() / 2 + 380, 20);
+        guiNode.attachChild(hudText13);
 
         inputManager.addMapping("Iniciar", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addListener(actionListener, "Iniciar");
@@ -226,7 +234,7 @@ public class JogoTapete extends SimpleApplication {
         if (Iniciar == true) {
             sonPre = false;
             audioInicio.play();
-            audioPreInicio.pause();
+            audioPreInicio.stop();
 
             inimigo = new Inimigo(pontuacao.nivel, assetManager, cor);
             Spatial s = rootNode.getChild("S1");
@@ -317,34 +325,35 @@ public class JogoTapete extends SimpleApplication {
 //*************************************SON*******************************************************
             //desligar son (G)           
             if (name.equals("DesligarSon") && !keyPressed) {
-                silencio();
-                Musica.pause();
+                hudText13.setText("Son desligado");
+                silencioGeral();
+                audioInicio.pause();
                 sonLigado = false;
-                if (Iniciar == true && sonPre == false) {
-                    audioInicio.setVolume(0);
-                } else {
-                    audioPause.pause();
-                    audioMorte.pause();
-                }
             }
             //Escuta musica de  stromae papaoutai
             if (name.equals("EscutarMusica") && !keyPressed) {
                 Musica();
             }
             if (name.equals("LigarSon") && !keyPressed) {
-                if (sonLigado == false) {
-                    volume();
-                    sonLigado = true;
+                hudText13.setText("Son ligado");
+                volumeAccoes();
+                //PreInicio
+                if (sonPre == true) {
+                    audioPreInicio.setVolume(3);
                 }
-                if (gameOver == true) {
-                    audioMorte.play();
-                } else if (jogoEmpausa == true) {
+                //Em Jogo
+                if (Iniciar == true) {
+                    audioInicio.setVolume(3);
+                }
+                //Em Pause
+                if (jogoEmpausa == true) {
                     audioPause.setVolume(3);
-                    audioPause.play();
-                } else {
-                    audioInicio.setVolume(2);
                 }
-
+                //Em GameOver
+                if (gameOver == true) {
+                    audioMorte.setVolume(3);
+                }
+                sonLigado = true;
             }
 //*************************************AJUDA-(L)*******************************************************
             if (name.equals("Ler") && !keyPressed) {
@@ -430,9 +439,10 @@ public class JogoTapete extends SimpleApplication {
                 if (noPausa == false && Iniciar == true) {
                     if (sonLigado == false) {
                         audioPause.setVolume(0);
+                    } else {
+                        audioPause.play();
+                        audioInicio.setVolume(0);
                     }
-                    sonPause();
-                    audioInicio.setVolume(0);
                     hudText4.setSize(guiFont.getCharSet().getRenderedSize());
                     hudText4.setColor(ColorRGBA.Pink);
                     hudText4.setText("Jogo Pausado..!");
@@ -447,9 +457,14 @@ public class JogoTapete extends SimpleApplication {
 
             if (name.equals("Retomar") && !keyPressed) {
                 if (Iniciar == false && jogoEmpausa == true) {
-                    volume();
-                    audioPause.pause();
-                    audioInicio.setVolume(2);
+                    if (sonLigado == false) {
+                        silencioGeral();
+                    }
+                    if (sonLigado == true) {
+                        volumeAccoes();
+                        audioPause.pause();
+                        audioInicio.setVolume(3);
+                    }
                     hudText4.setText("");
                     Iniciar = true;
                     jogoEmpausa = false;
@@ -457,7 +472,15 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************REINICIAR-(N)***************************************************            
             if (name.equals("Reinicia") && !keyPressed) {
-                audioMorte.pause();
+                if (sonLigado == true) {
+                    audioMorte.pause();
+                    audioInicio.play();
+                    audioInicio.setVolume(3);
+                }
+                if (sonLigado == false) {
+                    audioMorte.pause();
+                    audioInicio.setVolume(0);
+                }
                 hudText12.setText("Camera solta");
                 hudText3.setSize(guiFont.getCharSet().getRenderedSize());
                 hudText3.setColor(ColorRGBA.Red);
@@ -744,7 +767,7 @@ public class JogoTapete extends SimpleApplication {
         Alerta9.setText("F  || Fixar a camera");
         Alerta10.setText("C  || Camera a movimentar");
         Alerta11.setText("G  || Desligar son");
-        Alerta12.setText("H  || Escutar musica (son dslg)");
+        Alerta12.setText("H  || Escutar musica");
         Alerta13.setText("J  || Voltar son");
         Alerta14.setText("T  || Camera Porta ");
         Alerta15.setText("Y  || Camera Global");
@@ -762,9 +785,9 @@ public class JogoTapete extends SimpleApplication {
         Alerta11.setLocalTranslation(1125, (Alerta1.getLineWidth() / 4 + 580), 2);
         Alerta12.setLocalTranslation(1125, (Alerta1.getLineWidth() / 4 + 600), 2);
         Alerta13.setLocalTranslation(1123, (Alerta1.getLineWidth() / 4 + 620), 2);
-        Alerta14.setLocalTranslation(50, (Alerta1.getLineWidth() / 4 + 340), 2);
-        Alerta15.setLocalTranslation(50, (Alerta1.getLineWidth() / 4 + 320), 2);
-        Alerta16.setLocalTranslation(50, (Alerta1.getLineWidth() / 4 + 300), 2);
+        Alerta14.setLocalTranslation(50, (Alerta1.getLineWidth() / 4 + 320), 2);
+        Alerta15.setLocalTranslation(50, (Alerta1.getLineWidth() / 4 + 300), 2);
+        Alerta16.setLocalTranslation(50, (Alerta1.getLineWidth() / 4 + 280), 2);
         guiNode.attachChild(Alerta1);
         guiNode.attachChild(Alerta2);
         guiNode.attachChild(Alerta3);
@@ -785,8 +808,15 @@ public class JogoTapete extends SimpleApplication {
 
     //Game Over
     public void GameOver() {
-        sonMorte();
-        audioInicio.stop();
+        if (sonLigado == false) {
+            audioMorte.setVolume(0);
+             audioInicio.stop();
+        }
+        if (sonLigado == true) {
+            audioMorte.play();
+            audioMorte.setVolume(3);
+            audioInicio.stop();
+        }
         hudText12.setText("Camera fixa");
         hudText3.setSize(guiFont.getCharSet().getRenderedSize());
         hudText3.setColor(ColorRGBA.Red);
@@ -794,6 +824,7 @@ public class JogoTapete extends SimpleApplication {
         hudText3.setText("..GAME OVER..");
         hudText3.setLocalTranslation(622, hudText.getLineHeight() / 2 + 350, 20);
         guiNode.attachChild(hudText3);
+
         Iniciar = false;
         noPausa = true;
         gameOver = true;
@@ -872,14 +903,18 @@ public class JogoTapete extends SimpleApplication {
         audioMorte.play();
     }
 
-    public void silencio() {
+    public void silencioGeral() {
         audioFogo.setVolume(0);
         audioPassos.setVolume(0);
         audioPontoMais.setVolume(0);
         audioPontoMenos.setVolume(0);
+        audioPreInicio.setVolume(0);
+        audioMorte.setVolume(0);
+        audioPause.setVolume(0);
+        audioInicio.setVolume(0);
     }
 
-    public void volume() {
+    public void volumeAccoes() {
         audioFogo.setVolume(3);
         audioPassos.setVolume(3);
         audioPontoMais.setVolume(3);
