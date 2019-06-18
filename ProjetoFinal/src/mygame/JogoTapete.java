@@ -6,14 +6,19 @@ import com.jme3.audio.AudioNode;
 import com.jme3.font.BitmapText;
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.FogFilter;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
@@ -211,7 +216,6 @@ public class JogoTapete extends SimpleApplication {
 
     @Override
     public void simpleUpdate(float tpf) {
-
         //Cameras e suas posicoes
         hudText5.setSize(guiFont.getCharSet().getRenderedSize());
         hudText5.setColor(ColorRGBA.Pink);
@@ -311,18 +315,12 @@ public class JogoTapete extends SimpleApplication {
         public void onAction(String name, boolean keyPressed, float tpf) {
 
 //*************************************SON*******************************************************
+            //desligar son (G)           
             if (name.equals("DesligarSon") && !keyPressed) {
-                sonLigado = false;
-
-                audioFogo.setVolume(0);
-                audioPassos.setVolume(0);
-                audioPontoMais.setVolume(0);
-                audioPontoMenos.setVolume(0);
-
+                silencio();
                 Musica.pause();
-
+                sonLigado = false;
                 if (Iniciar == true && sonPre == false) {
-//                    audioInicio.pause();//nao funciona
                     audioInicio.setVolume(0);
                 } else {
                     audioPause.pause();
@@ -333,22 +331,20 @@ public class JogoTapete extends SimpleApplication {
             if (name.equals("EscutarMusica") && !keyPressed) {
                 Musica();
             }
-
             if (name.equals("LigarSon") && !keyPressed) {
                 if (sonLigado == false) {
-                    audioFogo.setVolume(3);
-                    audioPassos.setVolume(3);
-                    audioPontoMais.setVolume(3);
-                    audioPontoMenos.setVolume(3);
-                    if (gameOver == true) {
-                        audioMorte.play();
-                    } else if (jogoEmpausa == true) {
-                        audioPause.play();
-                    } else {
-                        audioInicio.play();//nao funciona...
-                        audioInicio.setVolume(2);
-                    }
+                    volume();
+                    sonLigado = true;
                 }
+                if (gameOver == true) {
+                    audioMorte.play();
+                } else if (jogoEmpausa == true) {
+                    audioPause.setVolume(3);
+                    audioPause.play();
+                } else {
+                    audioInicio.setVolume(2);
+                }
+
             }
 //*************************************AJUDA-(L)*******************************************************
             if (name.equals("Ler") && !keyPressed) {
@@ -432,6 +428,9 @@ public class JogoTapete extends SimpleApplication {
 
             if (name.equals("Pausa") && !keyPressed) {
                 if (noPausa == false && Iniciar == true) {
+                    if (sonLigado == false) {
+                        audioPause.setVolume(0);
+                    }
                     sonPause();
                     audioInicio.setVolume(0);
                     hudText4.setSize(guiFont.getCharSet().getRenderedSize());
@@ -448,8 +447,9 @@ public class JogoTapete extends SimpleApplication {
 
             if (name.equals("Retomar") && !keyPressed) {
                 if (Iniciar == false && jogoEmpausa == true) {
+                    volume();
                     audioPause.pause();
-                    audioInicio.play();
+                    audioInicio.setVolume(2);
                     hudText4.setText("");
                     Iniciar = true;
                     jogoEmpausa = false;
@@ -870,5 +870,19 @@ public class JogoTapete extends SimpleApplication {
         audioMorte.setLocalTranslation(Vector3f.ZERO.clone());
         rootNode.attachChild(audioMorte);
         audioMorte.play();
+    }
+
+    public void silencio() {
+        audioFogo.setVolume(0);
+        audioPassos.setVolume(0);
+        audioPontoMais.setVolume(0);
+        audioPontoMenos.setVolume(0);
+    }
+
+    public void volume() {
+        audioFogo.setVolume(3);
+        audioPassos.setVolume(3);
+        audioPontoMais.setVolume(3);
+        audioPontoMenos.setVolume(3);
     }
 }
