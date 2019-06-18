@@ -4,12 +4,15 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
 import com.jme3.font.BitmapText;
+import com.jme3.input.FlyByCamera;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
@@ -20,8 +23,14 @@ import com.jme3.ui.Picture;
 import java.awt.DisplayMode;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
+import javax.imageio.ImageIO;
+import javax.swing.Icon;
+import static org.lwjgl.opengl.Display.setFullscreen;
+import sun.applet.Main;
 
 public class JogoTapete extends SimpleApplication {
 
@@ -69,6 +78,11 @@ public class JogoTapete extends SimpleApplication {
     boolean gameOver = false;
     boolean audioJogando = false;
     boolean sonPre = true;
+    boolean sonLigado = true;
+
+    boolean camFrente = true;
+    boolean camPorta = false;
+    boolean camFogueira = false;
 
     int cor = 1;
     int corArea = 1;
@@ -76,10 +90,28 @@ public class JogoTapete extends SimpleApplication {
     //Main
     public static void main(String[] args) throws IOException {
         AppSettings settings = new AppSettings(true);
-        settings.setResolution(1200, 800);
+        settings.setResolution(1674, 1021);
         JogoTapete app = new JogoTapete();
         app.setSettings(settings);
+        app.setShowSettings(false);
+
+        settings.setBitsPerPixel(16);
+        settings.setSamples(16);
+        settings.setVSync(true);
+        settings.setFrequency(60);
+        settings.setStencilBits(8);
+        settings.setDepthBits(16);
+        settings.setGammaCorrection(true);
+        settings.setUseInput(true);
+        settings.setUseJoysticks(true);
+        settings.setEmulateMouse(true);
+        settings.setEmulateMouseFlipAxis(true, true);
+        settings.setAudioRenderer(AppSettings.LWJGL_OPENAL);
+        settings.setTitle("Esteira de Fogo");
+//        settings.setSettingsDialogImage("Imagens/Inicio.jpeg");
+//        settings.setIcons(new BufferedImage[]{ImageIO.read(new File("Imagens/Coracao.png"))});
         app.start();
+
         GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         DisplayMode[] modes = device.getDisplayModes();
         int i = 50;
@@ -87,6 +119,7 @@ public class JogoTapete extends SimpleApplication {
         settings.setFrequency(modes[i].getRefreshRate());
         settings.setBitsPerPixel(modes[i].getBitDepth());
         settings.setFullscreen(device.isFullScreenSupported());
+
         app.setSettings(settings);
         app.restart();
     }
@@ -94,13 +127,11 @@ public class JogoTapete extends SimpleApplication {
     @Override
     public void simpleInitApp() {
 
-        //Camera
         flyCam.setMoveSpeed(10f);
         flyCam.setRotationSpeed(1);
-
-        cam.setLocation(new Vector3f(-0.4f, 0f, 24f));//posicao
-        cam.setParallelProjection(false);//zoom
-        cam.update();
+        if (camFrente == true) {
+            cam.setLocation(new Vector3f(-0.4f, 0f, 24f));
+        }
 
         criarTapete();
         criarPortaEntrada();
@@ -112,6 +143,7 @@ public class JogoTapete extends SimpleApplication {
 
         esfera = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         pontuacao = new Pontuacao();
+
         hudText = new BitmapText(guiFont, false);
         hudText1 = new BitmapText(guiFont, false);
         hudText2 = new BitmapText(guiFont, false);
@@ -167,11 +199,20 @@ public class JogoTapete extends SimpleApplication {
         inputManager.addMapping("LigarSon", new KeyTrigger(KeyInput.KEY_J));
         inputManager.addListener(actionListener, "LigarSon");
 
+        inputManager.addMapping("camPorta", new KeyTrigger(KeyInput.KEY_T));
+        inputManager.addListener(actionListener, "camPorta");
+        inputManager.addMapping("camFrente", new KeyTrigger(KeyInput.KEY_Y));
+        inputManager.addListener(actionListener, "camFrente");
+        inputManager.addMapping("camFogueira", new KeyTrigger(KeyInput.KEY_U));
+        inputManager.addListener(actionListener, "camFogueira");
+
         area = new Area(pontuacao.nivel, assetManager, corArea);
     }
+
     @Override
     public void simpleUpdate(float tpf) {
 
+        //Cameras e suas posicoes
         hudText5.setSize(guiFont.getCharSet().getRenderedSize());
         hudText5.setColor(ColorRGBA.Pink);
         hudText5.setText("Facens -Computacao Grafica");
@@ -180,7 +221,7 @@ public class JogoTapete extends SimpleApplication {
 
         if (Iniciar == true) {
             sonPre = false;
-            sonInicio();
+            audioInicio.play();
             audioPreInicio.pause();
 
             inimigo = new Inimigo(pontuacao.nivel, assetManager, cor);
@@ -232,7 +273,6 @@ public class JogoTapete extends SimpleApplication {
                         hudText.setColor(ColorRGBA.Red);
                         hudText1.setColor(ColorRGBA.Red);
                         hudText2.setColor(ColorRGBA.Red);
-                        pontuacao.vida = 0;
                     }
                 }
                 //Verifica a Area de Ponto
@@ -272,10 +312,18 @@ public class JogoTapete extends SimpleApplication {
 
 //*************************************SON*******************************************************
             if (name.equals("DesligarSon") && !keyPressed) {
-                audioPreInicio.pause();
+                sonLigado = false;
+
+                audioFogo.setVolume(0);
+                audioPassos.setVolume(0);
+                audioPontoMais.setVolume(0);
+                audioPontoMenos.setVolume(0);
+
                 Musica.pause();
-                if (Iniciar == true) {
-                    audioInicio.pause();
+
+                if (Iniciar == true && sonPre == false) {
+//                    audioInicio.pause();//nao funciona
+                    audioInicio.setVolume(0);
                 } else {
                     audioPause.pause();
                     audioMorte.pause();
@@ -287,17 +335,22 @@ public class JogoTapete extends SimpleApplication {
             }
 
             if (name.equals("LigarSon") && !keyPressed) {
-                audioPreInicio.play();
-                if (gameOver == true) {
-                    audioMorte.play();
-                } else if (jogoEmpausa == true) {
-                    audioPause.play();
-                } else {
-                    audioInicio.play();
+                if (sonLigado == false) {
+                    audioFogo.setVolume(3);
+                    audioPassos.setVolume(3);
+                    audioPontoMais.setVolume(3);
+                    audioPontoMenos.setVolume(3);
+                    if (gameOver == true) {
+                        audioMorte.play();
+                    } else if (jogoEmpausa == true) {
+                        audioPause.play();
+                    } else {
+                        audioInicio.play();//nao funciona...
+                        audioInicio.setVolume(2);
+                    }
                 }
             }
 //*************************************AJUDA-(L)*******************************************************
-
             if (name.equals("Ler") && !keyPressed) {
                 hudText6.setSize(guiFont.getCharSet().getRenderedSize());
                 hudText7.setSize(guiFont.getCharSet().getRenderedSize());
@@ -336,8 +389,7 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************SAIR-(S)********************************************************
 
-            if (name.equals(
-                    "Sair") && !keyPressed) {
+            if (name.equals("Sair") && !keyPressed) {
                 hudText6.setText("");
                 hudText7.setText("");
                 hudText8.setText("");
@@ -347,8 +399,7 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************INICIAR-(I)*****************************************************
 
-            if (name.equals(
-                    "Iniciar") && !keyPressed) {
+            if (name.equals("Iniciar") && !keyPressed) {
                 if (jogoEmpausa != true) {
                     Iniciar = true;
                     audioJogando = true;
@@ -356,8 +407,7 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************COMBINAR-(SPACE)************************************************            
 
-            if ((name.equals(
-                    "Colisao") && !keyPressed) || ((name.equals("Mouse") && !keyPressed))) {
+            if ((name.equals("Colisao") && !keyPressed) || ((name.equals("Mouse") && !keyPressed))) {
                 if (Iniciar == true) {
                     if (verificaArea == true) {
                         if (cor == corArea) {
@@ -380,12 +430,10 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************PAUSA-(P)*******************************************************
 
-            if (name.equals(
-                    "Pausa") && !keyPressed) {
-
+            if (name.equals("Pausa") && !keyPressed) {
                 if (noPausa == false && Iniciar == true) {
                     sonPause();
-                    audioInicio.pause();
+                    audioInicio.setVolume(0);
                     hudText4.setSize(guiFont.getCharSet().getRenderedSize());
                     hudText4.setColor(ColorRGBA.Pink);
                     hudText4.setText("Jogo Pausado..!");
@@ -398,19 +446,17 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************RETOMAR-(R)*****************************************************           
 
-            if (name.equals(
-                    "Retomar") && !keyPressed) {
+            if (name.equals("Retomar") && !keyPressed) {
                 if (Iniciar == false && jogoEmpausa == true) {
                     audioPause.pause();
                     audioInicio.play();
                     hudText4.setText("");
                     Iniciar = true;
+                    jogoEmpausa = false;
                 }
             }
 //*************************************REINICIAR-(N)***************************************************            
-
-            if (name.equals(
-                    "Reinicia") && !keyPressed) {
+            if (name.equals("Reinicia") && !keyPressed) {
                 audioMorte.pause();
                 hudText12.setText("Camera solta");
                 hudText3.setSize(guiFont.getCharSet().getRenderedSize());
@@ -430,8 +476,7 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************AUMENTA_PASSO-(A)***********************************************
 
-            if ((name.equals(
-                    "AumentaVelocidade") && !keyPressed) || (name.equals("MouseA"))) {
+            if ((name.equals("AumentaVelocidade") && !keyPressed) || (name.equals("MouseA"))) {
                 if (Iniciar == true) {
                     sonPasso();
                     Aumentar = true;
@@ -439,8 +484,7 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************TROCA_COR-(T)***************************************************           
 
-            if ((name.equals(
-                    "Troca") && !keyPressed) || (name.equals("MouseT") && !keyPressed)) {
+            if ((name.equals("Troca") && !keyPressed) || (name.equals("MouseT") && !keyPressed)) {
                 if (jogoEmpausa != true) {
                     corArea += 1;
                     area.cor = corArea;
@@ -452,20 +496,63 @@ public class JogoTapete extends SimpleApplication {
             }
 //*************************************CAMERAS_FIXA(f),(c)***************************************************           
             //camera solta (C)
-
-            if (name.equals(
-                    "Camera") && !keyPressed) {
+            if (name.equals("Camera") && !keyPressed && camFrente == true) {
                 flyCam.setEnabled(true);
                 hudText12.setText("Camera solta");
-
+                cameraSolta = true;
             }
-            //camera fixa (f)
 
-            if (name.equals(
-                    "CameraFixa") && !keyPressed) {
+            //camera fixa (f)
+            if (name.equals("CameraFixa") && !keyPressed && camFrente == true) {
+                flyCam.setEnabled(false);
+                hudText12.setText("Camera fixa");
+                cameraSolta = false;
+            }
+            //camera porta (t)
+            if (name.equals("camPorta") && !keyPressed) {
+                camPorta = true;
+                camFogueira = false;
+                camFrente = false;
                 flyCam.setEnabled(false);
                 hudText12.setText("Camera fixa");
                 cameraSolta = true;
+            }
+            //camera frente(y)
+            if (name.equals("camFrente") && !keyPressed) {
+                camPorta = false;
+                camFogueira = false;
+                camFrente = true;
+                flyCam.setEnabled(true);
+                cam.setLocation(new Vector3f(-0.4f, 0f, 24f));
+                Quaternion Frente = new Quaternion();
+                Frente.fromAngleAxis(FastMath.PI, new Vector3f(0, 1, 0));
+                cam.setRotation(Frente);
+                cam.update();
+            }
+            //camera fogueira(u)
+            if (name.equals("camFogueira") && !keyPressed) {
+                camPorta = false;
+                camFogueira = true;
+                camFrente = false;
+                flyCam.setEnabled(false);
+                hudText12.setText("Camera fixa");
+                cameraSolta = false;
+            }
+            if (camPorta == true) {
+                Quaternion Porta = new Quaternion();
+                Porta.fromAngleAxis(FastMath.PI / 2, new Vector3f(0, 1, 0));
+                cam.setLocation(new Vector3f(-10.89f, -2.5f, -0.2f));
+                cam.setParallelProjection(false);
+                cam.setRotation(Porta);
+                cam.update();
+            }
+            if (camFogueira == true) {
+                Quaternion Fogueira = new Quaternion();
+                Fogueira.fromAngleAxis(-FastMath.PI / 2, new Vector3f(0, 1, 0));
+                cam.setLocation(new Vector3f(9.6f, -2.5f, -0.5f));
+                cam.setParallelProjection(false);
+                cam.setRotation(Fogueira);
+                cam.update();
             }
         }
     };
@@ -611,6 +698,9 @@ public class JogoTapete extends SimpleApplication {
         BitmapText Alerta11 = new BitmapText(guiFont, true);
         BitmapText Alerta12 = new BitmapText(guiFont, true);
         BitmapText Alerta13 = new BitmapText(guiFont, true);
+        BitmapText Alerta14 = new BitmapText(guiFont, true);
+        BitmapText Alerta15 = new BitmapText(guiFont, true);
+        BitmapText Alerta16 = new BitmapText(guiFont, true);
         Alerta1.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta2.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta3.setSize(guiFont.getCharSet().getRenderedSize());
@@ -624,6 +714,9 @@ public class JogoTapete extends SimpleApplication {
         Alerta11.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta12.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta13.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta14.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta15.setSize(guiFont.getCharSet().getRenderedSize());
+        Alerta16.setSize(guiFont.getCharSet().getRenderedSize());
         Alerta1.setColor(ColorRGBA.Yellow);
         Alerta2.setColor(ColorRGBA.Cyan);
         Alerta3.setColor(ColorRGBA.Blue);
@@ -637,6 +730,9 @@ public class JogoTapete extends SimpleApplication {
         Alerta11.setColor(ColorRGBA.Magenta);
         Alerta12.setColor(ColorRGBA.Yellow);
         Alerta13.setColor(ColorRGBA.Orange);
+        Alerta14.setColor(ColorRGBA.Magenta);
+        Alerta15.setColor(ColorRGBA.Orange);
+        Alerta16.setColor(ColorRGBA.White);
         Alerta1.setText("I  || Inicia o jogo");
         Alerta2.setText("0  || Troca cor area");
         Alerta3.setText("TAB  || Aumenta o passo");
@@ -650,6 +746,9 @@ public class JogoTapete extends SimpleApplication {
         Alerta11.setText("G  || Desligar son");
         Alerta12.setText("H  || Escutar musica (son dslg)");
         Alerta13.setText("J  || Voltar son");
+        Alerta14.setText("T  || Camera Porta ");
+        Alerta15.setText("Y  || Camera Global");
+        Alerta16.setText("U  || Camera Fogo");
         Alerta1.setLocalTranslation(1125, (Alerta1.getLineWidth() / 4 + 120), 2);
         Alerta2.setLocalTranslation(1125, (Alerta1.getLineWidth() / 4 + 100), 2);
         Alerta3.setLocalTranslation(1125, (Alerta1.getLineWidth() / 4 + 80), 2);
@@ -663,6 +762,9 @@ public class JogoTapete extends SimpleApplication {
         Alerta11.setLocalTranslation(1125, (Alerta1.getLineWidth() / 4 + 580), 2);
         Alerta12.setLocalTranslation(1125, (Alerta1.getLineWidth() / 4 + 600), 2);
         Alerta13.setLocalTranslation(1123, (Alerta1.getLineWidth() / 4 + 620), 2);
+        Alerta14.setLocalTranslation(50, (Alerta1.getLineWidth() / 4 + 340), 2);
+        Alerta15.setLocalTranslation(50, (Alerta1.getLineWidth() / 4 + 320), 2);
+        Alerta16.setLocalTranslation(50, (Alerta1.getLineWidth() / 4 + 300), 2);
         guiNode.attachChild(Alerta1);
         guiNode.attachChild(Alerta2);
         guiNode.attachChild(Alerta3);
@@ -676,6 +778,9 @@ public class JogoTapete extends SimpleApplication {
         guiNode.attachChild(Alerta11);
         guiNode.attachChild(Alerta12);
         guiNode.attachChild(Alerta13);
+        guiNode.attachChild(Alerta14);
+        guiNode.attachChild(Alerta15);
+        guiNode.attachChild(Alerta16);
     }
 
     //Game Over
@@ -735,39 +840,26 @@ public class JogoTapete extends SimpleApplication {
         audioPause.play();
     }
 
-    private void sonInicio() {
-        audioInicio.setLooping(false);
-        audioInicio.setPositional(true);
-        audioInicio.setLocalTranslation(Vector3f.ZERO.clone());
-        audioInicio.setVolume(3);
-        rootNode.attachChild(audioInicio);
-        audioInicio.play();
-    }
-
     private void sonFogo() {
         audioFogo.setLooping(false);
-        audioFogo.setVolume(2);
         rootNode.attachChild(audioFogo);
         audioFogo.playInstance();
     }
 
     private void sonPontomais() {
         audioPontoMais.setLooping(false);
-        audioPontoMais.setVolume(2);
         rootNode.attachChild(audioPontoMais);
         audioPontoMais.playInstance();
     }
 
     private void sonPontomenos() {
         audioPontoMenos.setLooping(false);
-        audioPontoMenos.setVolume(2);
         rootNode.attachChild(audioPontoMenos);
         audioPontoMenos.playInstance();
     }
 
     private void sonPasso() {
         audioPassos.setLooping(false);
-        audioPassos.setVolume(2);
         rootNode.attachChild(audioPassos);
         audioPassos.playInstance();
     }
@@ -776,7 +868,6 @@ public class JogoTapete extends SimpleApplication {
         audioMorte.setLooping(true);
         audioMorte.setPositional(true);
         audioMorte.setLocalTranslation(Vector3f.ZERO.clone());
-        audioMorte.setVolume(2);
         rootNode.attachChild(audioMorte);
         audioMorte.play();
     }
