@@ -113,7 +113,7 @@ public class JogoTapete extends SimpleApplication {
         settings.setEmulateMouse(true);
         settings.setEmulateMouseFlipAxis(true, true);
         settings.setAudioRenderer(AppSettings.LWJGL_OPENAL);
-        settings.setTitle("Esteira de Fogo");
+        settings.setTitle("Fornalha Rolante");
 //        settings.setSettingsDialogImage("Imagens/Inicio.jpeg");
 //        settings.setIcons(new BufferedImage[]{ImageIO.read(new File("Imagens/Coracao.png"))});
         app.start();
@@ -439,8 +439,9 @@ public class JogoTapete extends SimpleApplication {
                 if (noPausa == false && Iniciar == true) {
                     if (sonLigado == false) {
                         audioPause.setVolume(0);
-                    } else {
+                    } else if (sonLigado == true) {
                         audioPause.play();
+                        audioPause.setVolume(3);
                         audioInicio.setVolume(0);
                     }
                     hudText4.setSize(guiFont.getCharSet().getRenderedSize());
